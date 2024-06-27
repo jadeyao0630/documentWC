@@ -1,0 +1,55 @@
+table{
+    border-spacing: 0;
+    position: relative;
+    width:100%;
+    //height:calc( 100% - 60px);
+    tr{
+        //z-index: 2;
+        //position: relative;
+        //pointer-events: none;
+        td,th{
+            border-bottom: 1px solid #ddd;
+            white-space: nowrap;
+            padding:1rem .5rem;
+        }
+        th:not(last-child){
+            border-right: 2px solid #ddd;
+            padding:.5rem .5rem;
+        }
+        // &:last-child{
+        //     td{
+        //         border-bottom:none;
+        //     }
+        // }
+    }
+    thead{
+        position: sticky;
+        top:0;
+        z-index:3;
+    }
+}
+.popup {
+    position: absolute;
+    top: 20px; /* Adjust according to your layout */
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 1000;
+}
+
+.popup img {
+    max-width: 500px; /* Set the desired maximum width for the popup image */
+    max-height: 500px; /* Set the desired maximum height for the popup image */
+    width: auto;
+    height: auto;
+}
+
+.thumbnail {
+    max-width: 50px; /* Set the desired width for the thumbnail */
+    max-height: 50px; /* Set the desired height for the thumbnail */
+    width: auto;
+    height: auto;
+    cursor: pointer;
+}
