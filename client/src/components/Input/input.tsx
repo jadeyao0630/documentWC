@@ -66,10 +66,10 @@ const Input:React.FC<_InputProps> = (props) => {
                 <input
                     type="text"
                     ref={inputRef}
-                    className={'noOutline'}
+                    className={classes}
                     style={{minWidth:'none'}}
                     value={value}
-                    placeholder='过滤选项'
+                    placeholder='过滤'
                     {...restProps}
                     autoComplete="off" />
             </InputWrapper>

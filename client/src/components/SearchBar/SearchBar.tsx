@@ -29,8 +29,7 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
         }
     }
 
-    return <InputWrapper icon={'search'} isShowClear={true} onClear={()=>{ setSearch([]); }}>
-            <Input type="text" onChange={searchChange} autoComplete="off"/>
-            </InputWrapper>;
+    return <Input type="search" style={{display:'block',margin:'10px'}} onChange={searchChange} autoComplete="off"/>;
+            
 }
 export default SearchBar;
