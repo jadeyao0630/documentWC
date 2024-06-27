@@ -35,7 +35,7 @@ const tableColumns:Iobject={
         label:'所属项目',
         isEditble:true,
         width:"auto",
-        type:'text'
+        type:'combobox'
     },
     category:{
         label:'分类',
@@ -219,18 +219,18 @@ const MTable: FC<ImTableProps> = (props) => {
             return <Input style={{marginLeft:"10px"}} type='text' name={key} value={item[key]}/>
         }else if (columnData.type==="combobox"){
             return <Select isMultiple={false} 
-            style={{marginLeft:'5px'}}
+            style={{marginLeft:'10px',maxWidth:'215px'}}
             //selectedItemColor='red'
-            placeholder='test'
+            placeholder='请选择'
             isEditable={true}
             filterable={true} 
             onChange={(val,label)=>{console.log("onchanged",val,label)}} 
             options={[{label:'测试1',value:'1'},{label:'测试2',value:'2'},{label:'测试3',value:'3'},{label:'测试4',value:'4'}]}></Select>
         }else if(columnData.type==='multiCombobox'){
             return <Select isMultiple={true} 
-            style={{marginLeft:'10px',minWidth:'150px'}}
+            style={{marginLeft:'10px',marginRight:'0px',minWidth:'215px',maxWidth:'215px',height:40}}
             //selectedItemColor='red'
-            placeholder='test'
+            placeholder='请选择'
             isEditable={true}
             filterable={true} 
             onChange={(val,label)=>{console.log("onchanged",val,label)}} 

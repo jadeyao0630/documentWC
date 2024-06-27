@@ -1,7 +1,10 @@
 //样式变量
 @import "variables";
+//基本样式
+@import "root";
 
-@import "../components/MTable/styles";
+//菜单
+@import "../components/Menu/style";
 
 //图标
 @import "../components/Icon/style";
@@ -9,3 +12,7 @@
 @import "../components/Input/style";
 
 @import "../components/Select/style";
+
+@import "../components/MTable/styles";
+
+@import "../components/Popup/style";

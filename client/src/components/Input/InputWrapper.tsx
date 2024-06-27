@@ -6,7 +6,7 @@ interface InputWrapperProps{
     children?:React.ReactNode,
     icon?:IconProp,
     isShowClear?:boolean,
-    inputValue?:string,
+    inputValue?:string | number | readonly string[],
     onClear?:() => void
 }
 type AnchorInputProps = InputWrapperProps & AnchorHTMLAttributes<HTMLDivElement>

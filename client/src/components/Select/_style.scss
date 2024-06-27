@@ -82,3 +82,66 @@
         background-color:lighten(red,10%);
     }
   }
+  .listview-header{
+    
+    border-radius: $border-radius $border-radius 0 0;
+    cursor: default;
+    background-color: #e3e3e3;
+    user-select: none;
+    padding:$menu-subitem-padding-y $menu-subitem-padding-y;
+    font-weight: $font-weight-bold;
+    font-size: $font-size-sml;
+    //top:0;
+}
+// input[type="checkbox"] {
+//     /* Scale the checkbox - 1.5 times the original size */
+//     transform: scale(1.5);
+
+//     /* Optional: you may want to adjust the margin to accommodate the larger checkbox */
+//     margin: 5px;
+// }
+.gr-checkbox{
+    display: grid;
+    grid-template-columns: 1fr auto;
+    min-width: 100px;
+    padding:$menu-subitem-padding-y $menu-subitem-padding-y;
+    
+    padding-left: 15px;
+    text-align: left;
+    font-weight: $font-weight-bold;
+    user-select: none;
+    cursor: pointer;
+    > label{
+        cursor: pointer;
+    }
+    > input[type="checkbox"]{
+        display: none;
+    }
+    > input[type="checkbox"]:checked + .checkbox-label {
+        background-color: $blue; /* Background when checked */
+    }
+    /* Optional: style for a checkmark */
+    > input[type="checkbox"]:checked + .checkbox-label:after {
+        content: "";
+        position: absolute;
+        left: 7px;
+        top: 3px;
+        width: 6px;
+        height: 12px;
+        border: solid $white;
+        border-width: 0 3px 3px 0;
+        transform: rotate(45deg);
+    }
+    .checkbox-label {
+        display: inline-block;
+        width: 20px; /* Width of the checkbox */
+        height: 20px; /* Height of the checkbox */
+        //border: 2px solid $gray-600; /* Border of the checkbox */
+        background-color: rgba(0,0,0,.1);
+        border-radius: $btn-border-radius-sml;
+        //cursor: pointer;
+        position: relative;
+        margin:auto 5px auto 10px;
+        text-align: center;
+    }
+}

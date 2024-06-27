@@ -1,0 +1,84 @@
+.popup{
+    
+    white-space: nowrap;
+    position: absolute;
+    border: $menu-border-width solid $menu-border-color;
+    filter: $menu-filter;
+    background-color: $body-bg;
+    border-radius: $btn-border-radius-lrg;
+    z-index: 999;
+    ul{
+        list-style: none;
+        padding:1px;
+        margin-top: 0px;
+        margin-bottom: 0px;
+            li{
+                
+                padding: $menu-item-padding-y $menu-item-padding-x;
+                &:last-child{
+                    
+                    border-radius: 0 0 $border-radius-sml $border-radius-sml;
+                }
+                &:first-child{
+                    
+                    border-radius: $border-radius-sml $border-radius-sml 0 0;
+                }
+                &.li-title{
+                    padding: $menu-item-padding-y*0.4 $menu-item-padding-x;
+                    background-color: $gray-400;
+                    
+                }
+                &.li-message{
+                }
+                &:not(.input,.li-title,.li-message):hover{
+                    background-color: $gloryBlue;
+                    color:white;
+                    cursor: pointer;
+                }
+            }
+    }
+}
+.popup.hide{
+    display: none;
+}
+.popup-menu{
+    background-color: $body-bg;
+    //filter:drop-shadow(0 0.2rem 0.25rem rgba(0, 0, 0, 0.8));
+    box-shadow: 0 2px 5px rgba(0,0,0,1);
+    border-radius: $border-radius;
+    padding:1px;
+    margin-top: 2px;
+}
+.popup-listview{
+
+    //transform-origin: bottom;
+    max-height: 400px;
+    margin:0;
+    text-align: left;
+    overflow-y: scroll;
+    //bottom:0px;
+    //padding:$page-container-padding-y $page-container-padding-x;
+    //padding-left: 0;
+    padding:1px;
+    > li{
+        position: relative;
+        cursor: pointer;
+        list-style: none;
+        &:hover:not(.listview-header){
+            background-color: $table-stripe-color;
+            //color:$white;
+        }
+        
+        &:last-child{
+            border-radius: 0 0 $border-radius $border-radius;
+        }
+        &:first-child{
+            
+        }
+        &:not(:last-child){
+            border-bottom: 1px solid $gray-400;
+        }
+    }
+    
+    //padding-left: 0;
+}

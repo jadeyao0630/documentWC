@@ -5,7 +5,7 @@ import InputWrapper from './InputWrapper';
 
 export interface InputProps{
     inline?:boolean,
-    value?:string,
+    //value?:string,
     style ?: React.CSSProperties;
     type?:React.HTMLInputTypeAttribute;
 }
@@ -21,7 +21,6 @@ const Input:React.FC<_InputProps> = (props) => {
     //const [inputValue, setInputValue] = useState(value)
     
     const inputRef = useRef<HTMLInputElement>(null)
-    const [inputValue, setInputValue] = useState(value);
     const adjustWidth = () => {
         if (inputRef.current && inline){
             inputRef.current.style.width = `${inputRef.current.value.length + 1 + 3}ch`
@@ -30,12 +29,13 @@ const Input:React.FC<_InputProps> = (props) => {
 
     useEffect(()=>{
         adjustWidth()
-    },[inputValue])
+    },[value])
 
 
     const classes = classNames('gr-input',{
         [`input-${type}`]: type,
-        'disabled': disabled
+        'disabled': disabled,
+        'noOutline':type==='search'
     })
     if(type==='checkbox'){
         return (
@@ -43,7 +43,7 @@ const Input:React.FC<_InputProps> = (props) => {
                 <input 
                     type={type} className={classes}
                     ref={inputRef}
-                    value={inputValue} 
+                    value={value} 
                     disabled={disabled}
                     style={{...{minWidth: '20px'},...style}}
                     {...restProps}
@@ -62,13 +62,13 @@ const Input:React.FC<_InputProps> = (props) => {
         return(
             <div style={{...{display:'inline-block',verticalAlign: 'middle'},...style}}>
 
-            <InputWrapper icon={'search'} isShowClear={true} inputValue={inputValue} onClear={()=>{ setInputValue('') }}>
+            <InputWrapper icon={'search'} isShowClear={true} inputValue={value} onClear={()=>{ }}>
                 <input
                     type="text"
                     ref={inputRef}
-                    className={classes}
+                    className={'noOutline'}
                     style={{minWidth:'none'}}
-                    value={inputValue}
+                    value={value}
                     placeholder='过滤选项'
                     {...restProps}
                     autoComplete="off" />
@@ -82,7 +82,7 @@ const Input:React.FC<_InputProps> = (props) => {
             <input 
                 type={type} className={classes}
                 ref={inputRef}
-                value={inputValue} 
+                value={value} 
                 disabled={disabled}
                 style={{...{minWidth: '20px'},...style}}
                 {...restProps}
