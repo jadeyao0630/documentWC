@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDBload } from './DBLoaderContext';
+import {serverIp,serverPort} from '../../utils/config'
 
 type databaseType = 'mysql' | 'mssql'
 
@@ -7,8 +8,8 @@ type databaseType = 'mysql' | 'mssql'
 interface DatabaseLoaderProps {
   databaseType?:databaseType
 }
-const serverIp='192.168.6.213'
-const serverPort = '4555'
+//const serverIp='192.168.10.122'//'192.168.6.213'
+//const serverPort = '4555'
 
 const headers={
     'Content-Type': 'application/json'
@@ -30,7 +31,7 @@ const DatabaseLoader: React.FC<DatabaseLoaderProps> = (props) => {
             person  AS '经办人',
             location AS '分类',
             modifiedTime AS '更新日期',
-            description AS '备注',
+            description AS '标签',
             coverPage AS '封面页',
             attachement AS '附件' 
             from documents_list

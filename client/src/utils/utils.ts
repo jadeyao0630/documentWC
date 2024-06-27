@@ -1,3 +1,5 @@
+import { Iobject } from "../components/MTable/MTable";
+
  function formatDateTime(dateTimeStr:string) {
     const date = new Date(dateTimeStr);
 
@@ -10,5 +12,8 @@
 
     return `${year}年${month}月${day}日 ${hours}:${minutes}`;
 }
-
-export {formatDateTime}
+const findColumnByLabel = (columns: Iobject, label: string) => {
+    const key = Object.keys(columns).find(key => columns[key].label === label && columns[key].isEditble);
+    return key ? columns[key] : undefined;
+  }
+export {formatDateTime,findColumnByLabel}

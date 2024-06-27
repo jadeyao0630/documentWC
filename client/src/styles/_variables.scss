@@ -1,0 +1,289 @@
+$white: #fff !default;
+$gray-100: #fafafa !default;
+$gray-200: #f0f0f0 !default;
+$gray-300: #d6d6d6 !default;
+$gray-400: #bbbbbb !default;
+$gray-500: #a8a8a8 !default;
+$gray-600: #7c7c7c !default;
+$gray-700: #777777 !default;
+$gray-800: #3f3f3f !default;
+$gray-900: #292929 !default;
+$black: #000 !default;
+
+$blue: #0d6efd !default;
+$gloryBlue: #1362B7 !default;
+$indigo: #6610f2 !default;
+$purple: #6f42c1 !default;
+$pink: #d63384 !default;
+$red: #dc3545 !default;
+$gloryRed: #c21f30 !default;
+$orange: #fd7e14 !default;
+$yellow: #fadb14 !default;
+$green: #348a09 !default;
+$teal: #20c997 !default;
+$cyan: #17a2b8 !default;
+
+$primary: $gloryRed !default;//基本色
+$secondary: $gray-600 !default;//辅助色
+$success: $green !default;//成功
+$info: $cyan !default;//信息
+$warning: $yellow !default;//警告
+$danger: $red !default;//危险
+$light: $gray-100 !default;//浅色
+$dark: $gray-800 !default;//深色
+
+$theme-colors:
+(
+    "primary": $primary,
+    "secondary": $secondary,
+    "success": $success,
+    "info": $info,
+    "warning": $warning,
+    "danger": $danger,
+    "light": $light,
+    "dark": $dark,
+    "blue": $blue,
+    "indigo": $indigo,
+    "purple": $purple,
+    "pink": $pink,
+    "red": $red,
+    "gloryRed": $gloryRed,
+    "orange": $orange,
+    "yellow": $yellow,
+    "green": $green,
+    "teal": $teal,
+    "cyan": $cyan,
+    "white": $white
+);
+
+//字体
+// 华文细黑：STHeiti Light [STXihei]
+
+// 华文黑体：STHeiti
+
+// 华文楷体：STKaiti
+
+// 华文宋体：STSong
+
+// 华文仿宋：STFangsong
+
+// 儷黑 Pro：LiHei Pro Medium
+
+// 儷宋 Pro：LiSong Pro Light
+
+// 標楷體：BiauKai
+
+// 蘋果儷中黑：Apple LiGothic Medium
+
+// 蘋果儷細宋：Apple LiSung Light
+
+// Windows的一些：
+
+// 新細明體：PMingLiU
+
+// 細明體：MingLiU
+
+// 標楷體：DFKai-SB
+
+// 黑体：SimHei
+
+// 宋体：SimSun
+
+// 新宋体：NSimSun
+
+// 仿宋：FangSong
+
+// 楷体：KaiTi
+
+// 仿宋_GB2312：FangSong_GB2312
+
+// 楷体_GB2312：KaiTi_GB2312
+
+// 微軟正黑體：Microsoft JhengHei
+
+// 微软雅黑体：Microsoft YaHei
+
+// 装Office会生出来的一些：
+
+// 隶书：LiSu
+
+// 幼圆：YouYuan
+
+// 华文细黑：STXihei
+
+// 华文楷体：STKaiti
+
+// 华文宋体：STSong
+
+// 华文中宋：STZhongsong
+
+// 华文仿宋：STFangsong
+
+// 方正舒体：FZShuTi
+
+// 方正姚体：FZYaoti
+
+// 华文彩云：STCaiyun
+
+// 华文琥珀：STHupo
+
+// 华文隶书：STLiti
+
+// 华文行楷：STXingkai
+
+// 华文新魏：STXinwei
+
+$font-family-sans-serif: "Microsoft YaHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !default;
+$font-family-monospace: SFMono-regular, Menlo, Monaco, Consolas, !default;//等宽
+$font-family-base: $font-family-sans-serif !default;//主字体
+
+//字体大小
+$font-size-base: 1rem !default;
+$font-size-lrg: $font-size-base * 1.25 !default;
+$font-size-sml: $font-size-base * .875 !default;
+$font-size-ssml: $font-size-base * .675 !default;
+
+//字体粗细
+$font-weight-lighter: lighter !default;
+$font-weight-light: 300 !default;
+$font-weight-normal: 400 !default;
+$font-weight-bold: 700 !default;
+$font-weight-bolder: 300 !default;
+$font-weight-base: $font-weight-normal !default;
+
+//行高
+$line-height-base: 1.5 !default;
+$line-height-lrg: 2 !default;
+$line-height-sml: 1.25 !default;
+
+//heading字号
+$h1-font-size: $font-size-base * 2.5 !default;
+$h2-font-size: $font-size-base * 2 !default;
+$h3-font-size: $font-size-base * 1.75 !default;
+$h4-font-size: $font-size-base * 1.5 !default;
+$h5-font-size: $font-size-base * 1.25 !default;
+$h6-font-size: $font-size-base !default;
+
+//主体
+$body-bg: $white !default;
+$body-color: $gray-900 !default;
+$body-text-align: null !default;
+
+//分割线
+$hr-height: 1px !default;
+$hr-opacity: 1 !default;
+$hr-color: $gloryRed !default;
+$hr-margin-y: 1rem !default;
+
+$spacer: 1rem !default;
+
+//heading基本
+$headings-margin-bottom: $spacer / 2 !default;
+$headings-font-family: null !default;
+$headings-font-style: null !default;
+$headings-font-weight: 500 !default;
+$headings-line-height: 1.2 !default;
+$headings-color: null !default;
+
+//文字章节内容
+$paragraph-margin-bottom: 1rem !default;
+
+//显示
+$display1-size: 6rem !default;
+$display2-size: 5.5rem !default;
+$display3-size: 4.5rem !default;
+$display4-size: 3.5rem !default;
+
+$display-weight: 300 !default;
+
+$enable-pointer-cursor-for-buttons: true !default;
+
+//边框和倒角
+$border-width: 1px !default;
+$border-color: $gray-300 !default;
+
+$border-radius: .25rem !default;
+$border-radius-lrg: .3rem !default;
+$border-radius-sml: .2rem !default;
+
+
+//a按钮
+$btn-link-color: $primary !default;
+$btn-link-decoration: none !default;
+$btn-link-hover-color: darken($btn-link-color,15%) !default;
+$btn-link-hover-decoration: underline !default;
+$btn-link-disabled-color: $gray-600;
+
+//按钮
+$btn-font-weight: 400;
+$btn-padding-y: .375rem !default;
+$btn-padding-x: .75rem !default;
+$btn-font-family: $font-family-base !default;
+$btn-font-size: $font-size-base !default;
+$btn-line-height: $line-height-base !default;
+
+$btn-padding-y-sml: .25rem !default;
+$btn-padding-x-sml: .5rem !default;
+$btn-font-size-sml: $font-size-sml !default;
+
+$btn-padding-y-lrg: .5rem !default;
+$btn-padding-x-lrg: 1rem !default;
+$btn-font-size-lrg: $font-size-lrg !default;
+$btn-padding-y-lrg-keepSize: .2rem !default;
+$btn-padding-x-lrg-keepSize: .5rem !default;
+
+//按钮边框
+$btn-border-width: $border-width !default;
+
+//按钮其它
+$btn-box-shadow: drop-shadow(0 0.1rem 0.1rem rgba(0, 0, 0, 0.3)) !default;
+$btn-disabled-opacity: .65 !default;
+
+//按钮倒角
+$btn-border-radius: $border-radius !default;
+$btn-border-radius-lrg: $border-radius-lrg !default;
+$btn-border-radius-sml: $border-radius-sml !default;
+
+$btn-transition: color .15s ease-in-out, background-color .15s ease-in-out !default;
+
+//菜单
+$menu-border-width: $border-width !default;
+$menu-border-color: $border-color !default;
+$menu-box-shadow: inset 0 1px 0 rgbs($white, .15), 0 1px 1px 1px rgba($black, .2) !default;
+$menu-filter: drop-shadow(0 0.2rem 0.25rem rgba(0, 0, 0, 0.2)) !default;
+$menu-transition: color .15s ease-in-out, border-color .15s ease-in-out !default;
+
+//菜单项
+$menu-item-padding-y: .5rem !default;
+$menu-item-padding-x: .5rem !default;
+$menu-item-active-color: $primary !default;
+$menu-item-active-border-width: 2px !default;
+$menu-item-disabled-color: $gray-600 !default;
+
+//子菜单
+$menu-subitem-padding-x: 0rem !default;
+$menu-subitem-padding-y: .5rem !default;
+
+//页面
+$page-container-padding-x: 1rem !default;
+$page-container-padding-y: 1rem !default;
+$page-spliter-border-color:lighten($black,65%) !default;
+$page-spliter-border-width:1px !default;
+$page-spliter-border:$page-spliter-border-width solid $page-spliter-border-color !default;
+
+//表格
+$table-item-padding-x: 1rem !default;
+$table-item-padding-y: .5rem !default;
+$table-border-color: $gray-400 !default;
+$table-border-width: 1px !default;
+$table-border:$table-border-width solid $table-border-color !default;
+$table-stripe-color: #f2f2f2 !default;
+
+$input-filter: drop-shadow(0 0rem 0.25rem rgba(13, 110, 253, 0.6)) !default;
+//表单
+
+
+//其它
+$footer-shadow-filter: drop-shadow(0 0rem 0.25rem rgba(0, 0, 0, 0.6)) !default;
+$button-filter: drop-shadow(0 0.05rem 0.05rem rgba(0, 0, 0, 0.6)) !default;
+$focused-boxShadow: 0 0 5px #007bff;

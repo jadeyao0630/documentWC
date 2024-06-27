@@ -1,0 +1,84 @@
+
+.select-item{
+    display: table;
+    width:100%;
+    //grid-template-columns: auto 1fr;
+    & *{
+        cursor: pointer;
+    }
+    > label{
+        vertical-align: middle;
+        display: table-cell;
+        padding: 0.5rem 1rem;
+    }
+}
+.select-item-li-hidden{
+    display: none;
+}
+.select-header{
+    background-color: $gray-200;
+    height: 30px;
+    border-radius: $border-radius $border-radius 0 0;
+    border-bottom: 1px solid $gray-400;
+}
+.select-search{
+    //margin:8px;
+    border: 1px solid $gray-400;
+    border-radius: $border-radius;
+    padding: 0.3rem 0.5rem;
+    width:100%;
+}
+.select-search-container{
+    width:100%;
+    padding:8px;
+    border-bottom: 1px solid $gray-400;
+}
+  .gr-input-wrapper:focus-within{
+    box-shadow: $focused-boxShadow;
+  }
+  .custom-input {
+    border:none;
+    background-color: transparent;
+    padding: .3rem 0rem;
+    margin: .2rem 0rem;
+  }
+  .custom-input:focus{
+    filter:none;
+    outline: none;
+  }
+  .custom-input:read-only{
+    cursor: pointer;
+  }
+  .input-content-container{
+    display:inline-flex;
+    flex-flow: row;
+    overflow: auto hidden;
+  }
+  .input-content {
+    position: relative;
+    display:inline-block;
+    color:white;
+    border-radius:5px;
+    padding: .2rem 0.5rem;
+    //cursor: pointer;
+    margin: .2rem .2rem .2rem 0rem;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .input-content-close{
+    position:absolute;
+    right:-3px;
+    top:-3px;
+    width:10px;
+    height:10px;
+    color:white;
+    border-radius: 15px;
+    background-color: red;
+    padding:2px;
+    cursor: pointer;
+    filter:$button-filter;
+    user-select: none;
+    &:hover{
+        background-color:lighten(red,10%);
+    }
+  }
