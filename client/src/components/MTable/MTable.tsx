@@ -4,7 +4,7 @@ import { findColumnByLabel, formatDateTime } from '../../utils/utils';
 import {serverIp,serverPort} from '../../utils/config'
 import io from 'socket.io-client';
 import Input from "../Input/input";
-import Select from "../Select/Select";
+import Select, { SelectOption } from "../Select/Select";
 // import classNames from "classnames";
 
 export interface ImTableProps {
@@ -82,6 +82,7 @@ const MTable: FC<ImTableProps> = (props) => {
     const popupRef = useRef<HTMLDivElement>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentItem, setCurrentItem] = useState<Iobject>();
+    const [docLabels,setDocLabels] = useState<SelectOption[]>([{label:'测试1',value:'1'},{label:'测试2',value:'2'},{label:'测试3',value:'3'},{label:'测试4',value:'4'}]);
     const openModal = (id: any) => {
         const filteredResult = result?.filter((res: Iobject) => res['编号'] === id);
         if(filteredResult!==undefined && filteredResult.length>0){
@@ -214,9 +215,30 @@ const MTable: FC<ImTableProps> = (props) => {
         return null
         
     }
+    const onTextChanged = (e:React.ChangeEvent<HTMLInputElement>,key:string,item:Iobject)=>{
+        const updatedItem = { ...item, [key]: e.target.value };
+        setCurrentItem(updatedItem);
+    }
+    const onSubmited = () => {
+        const updatedItem = { ...currentItem, ['更新日期']: new Date().toISOString() };
+        console.log(updatedItem)
+    }
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+          console.log('Enter key pressed');
+          const newItem=(event.target as HTMLInputElement).value;
+          if(docLabels.filter(item => item.label === newItem).length===0){
+            setDocLabels((v)=>{
+                return [...v,{label:newItem,value:v.length.toString()}]
+              })
+          }
+          
+          // Add your logic here for when the Enter key is pressed
+        }
+      };
     const getItem = (columnData:ColumnData,key:string,item:Iobject) => {
         if(columnData.type==="text"){
-            return <Input style={{marginLeft:"10px"}} type='text' name={key} value={item[key]}/>
+            return <Input style={{marginLeft:"10px"}} type='text' name={key} value={item[key]} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{onTextChanged(e,key,item)}}/>
         }else if (columnData.type==="combobox"){
             return <Select isMultiple={false} 
             style={{marginLeft:'10px',maxWidth:'215px'}}
@@ -230,11 +252,13 @@ const MTable: FC<ImTableProps> = (props) => {
             return <Select isMultiple={true} 
             style={{marginLeft:'10px',marginRight:'0px',minWidth:'215px',maxWidth:'215px',height:40}}
             //selectedItemColor='red'
+            value={"测试1"}
+            onKeydown={handleKeyDown}
             placeholder='请选择'
             isEditable={true}
             filterable={true} 
             onChange={(val,label)=>{console.log("onchanged",val,label)}} 
-            options={[{label:'测试1',value:'1'},{label:'测试2',value:'2'},{label:'测试3',value:'3'},{label:'测试4',value:'4'}]}></Select>
+            options={docLabels}></Select>
         }
         return <Input style={{marginLeft:"10px"}} type='text' name={key} value={item[key]}/>
     }
@@ -270,15 +294,13 @@ const MTable: FC<ImTableProps> = (props) => {
                 <div className="modal">
                 <div className="modal-content">
                     <span className="close-button" onClick={closeModal}>&times;</span>
-                    <form>
                     <h2>{currentItem['编号']}</h2>
                     <div className="modal-form">
                         {createForm()}
                     </div>
                     <div>
-                        <button type="submit">Submit</button>
+                        <button onClick={onSubmited}>Submit</button>
                     </div>
-                    </form>
                 </div>
                 </div>
             )}

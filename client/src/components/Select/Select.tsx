@@ -1,15 +1,12 @@
 import React, { useState, useEffect, useRef, InputHTMLAttributes } from 'react';
 import Input from '../Input/input';
-import { string } from 'prop-types';
 import Icon from '../Icon/icon';import { fas } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core';
 import SelectItem from './SelectItem';
-import { unwatchFile } from 'fs';
-import { isEditable } from '@testing-library/user-event/dist/utils';
 import InputWrapper from '../Input/InputWrapper';
 library.add(fas)
 
-interface SelectOption {
+export interface SelectOption {
     value: string;
     label: string;
 }
@@ -33,6 +30,7 @@ interface SelectProps {
   selectedItemColor?:string;
   /** 选取菜单选取改变事件 */
   onChange?: (values: string| string[]|undefined,labels?:string| string[]|undefined) => void;
+  onKeydown?:(e:React.KeyboardEvent<HTMLInputElement>)=>void;
   /** 选取菜单样式 */
   style?:React.CSSProperties;
 }
@@ -44,7 +42,7 @@ const Select: React.FC<SelectProps> = ({
   isEditable=true,
   filterable=true ,
   options=[{label:'测试1',value:'1'},{label:'测试2',value:'2'},{label:'测试3',value:'3'},{label:'测试4',value:'4'}],
-  value,menuTitle,selectedItemColor, onChange,style }) => {
+  value,menuTitle,selectedItemColor, onChange,onKeydown,style }) => {
     const [dropdownVisible, setDropdownVisible] = useState(false);
     const [inputValue, setInputValue] = useState(value);
     
@@ -196,7 +194,18 @@ const Select: React.FC<SelectProps> = ({
       <div className="gr-select" ref={ref} style={{...{ position: 'relative',display:'inline-block',verticalAlign:'middle',maxWidth:'200px',minWidth:'100px' },...style}} onFocus={() => {console.log('blur')}}>
 
         <InputWrapper isShowClear={!isMultiple} inputValue={getInputValue()} onClear={handlInputClear} tabIndex={0}>
-            {isMultiple && <><div className='input-content-container' onFocus={() => console.log('blur1')}>{generateMultipleSelectedItems()}</div>
+            {isMultiple && <><div className='input-content-container' onFocus={() => console.log('blur1')}>{generateMultipleSelectedItems()}
+            {isEditable && <Input
+                type="text"
+                //value={getInputValue()}
+                //onChange={handleInputChange}
+                onFocus={() => setDropdownVisible(true)}
+                autoComplete="off"
+                onKeyDown={onKeydown}
+                //placeholder={placeholder}
+                className="custom-input" />}
+            </div>
+            
             <div style={{cursor:'pointer',display:'inline-block',height:'100%',minWidth:'20px',position:'relative',textAlign:'right',alignContent:'center',padding:'.4rem'}}
             onClick={() => setDropdownVisible(!dropdownVisible)}><Icon icon={!dropdownVisible?'caret-down':'caret-up'}
                 /></div></>}
