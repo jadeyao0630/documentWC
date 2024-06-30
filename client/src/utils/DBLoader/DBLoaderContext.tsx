@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { Iobject } from '../../components/MTable/MTable';
 
 
 type databaseType = 'mysql' | 'mssql'
@@ -7,10 +8,20 @@ type databaseType = 'mysql' | 'mssql'
 interface DBLoaderContextType {
 //   databaseType:databaseType
 //   setDatabaseType:(type:databaseType)=>void;
-  result?:Array<object>;
-  setResult:(result:Array<object>)=>void;
-  search?:Array<object>;
-  setSearch:(search:Array<object>)=>void;
+  result?:Array<Iobject>;
+  setResult:(result:Array<Iobject>)=>void;
+  search?:Array<Iobject>;
+  setSearch:(search:Array<Iobject>)=>void;
+  projects?:Array<Iobject>;
+  setProjects:(projects:Array<Iobject>)=>void;
+  categories?:Array<Iobject>;
+  setCategories:(categories:Array<Iobject>)=>void;
+  locations?:Array<Iobject>;
+  setLocations:(locations:Array<Iobject>)=>void;
+  tags?:Array<Iobject>;
+  setTags:(tags:Array<Iobject>)=>void;
+  tagsToAdd?:Array<Iobject>;
+  setTagsToAdd:(tagsToAdd:Array<Iobject>)=>void;
 }
 
 // 创建上下文
@@ -23,10 +34,21 @@ interface DBLoaderProviderProps {
 
 export const DBLoaderProvider: React.FC<DBLoaderProviderProps> = ({ children }) => {
     //const [databaseType, setDatabaseType] = useState<databaseType>('mssql');
-    const [result, setResult] = useState<Array<object>>();
-    const [search, setSearch] = useState<Array<object>>();
+    const [result, setResult] = useState<Array<Iobject>>();
+    const [search, setSearch] = useState<Array<Iobject>>();
+    const [projects, setProjects] = useState<Array<Iobject>>();
+    const [categories, setCategories] = useState<Array<Iobject>>();
+    const [locations, setLocations] = useState<Array<Iobject>>();
+    const [tags, setTags] = useState<Array<Iobject>>();
+    const [tagsToAdd, setTagsToAdd] = useState<Array<Iobject>>();
   return (
-    <DBLoaderContext.Provider value={{ result, setResult,search, setSearch}}>
+    <DBLoaderContext.Provider value={{ result, setResult,
+                                        search, setSearch,
+                                        projects, setProjects,
+                                        categories, setCategories,
+                                        locations, setLocations,
+                                        tags, setTags,
+                                        tagsToAdd, setTagsToAdd}}>
       {children}
     </DBLoaderContext.Provider>
   );

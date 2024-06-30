@@ -21,6 +21,42 @@ BEGIN
         description NVARCHAR(1000),
         coverPage NVARCHAR(1000),
         attachement NVARCHAR(1000),
+        isDisabled BIT default 0,
         PRIMARY KEY (id, docId)
+    )
+END
+
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='tags' AND xtype='U')
+BEGIN
+    CREATE TABLE tags (
+        id INT PRIMARY KEY,
+        name NVARCHAR(1000),
+        freq INT DEFAULT 1,
+        isDisabled BIT default 0,
+    )
+END
+
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='projects' AND xtype='U')
+BEGIN
+    CREATE TABLE projects (
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        name NVARCHAR(1000),
+        isDisabled BIT default 0,
+    )
+END
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='categories' AND xtype='U')
+BEGIN
+    CREATE TABLE categories (
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        name NVARCHAR(1000),
+        isDisabled BIT default 0,
+    )
+END
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='locations' AND xtype='U')
+BEGIN
+    CREATE TABLE locations (
+        id INT IDENTITY(1,1) PRIMARY KEY,
+        name NVARCHAR(1000),
+        isDisabled BIT default 0,
     )
 END

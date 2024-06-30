@@ -1,0 +1,121 @@
+.btn {
+    position: relative;
+    display: inline-block;
+    font-weight: $btn-font-weight;
+    line-height: $btn-line-height;
+    color: $body-color;
+    white-space: nowrap;
+    text-align: center;
+    vertical-align: middle;
+    background-image: none;
+    border: $btn-border-width solid transparent;
+    @include button-size($btn-padding-y, $btn-padding-x, $btn-font-size, $border-radius);
+
+    
+    cursor: pointer;
+    transition: $btn-transition;
+    &.disabled,
+    &[disabled]{
+        cursor:default;
+        opacity:$btn-disabled-opacity;
+        box-shadow: none;
+        filter: none;
+        > * {
+            pointer-events: none;
+        }
+    }
+    &:focus{
+        box-shadow: $focused-boxShadow;
+    }
+}
+.btn-lrg {
+    @include button-size($btn-padding-y-lrg, $btn-padding-x-lrg, $btn-font-size-lrg, $border-radius-lrg);
+}
+.btn-sml {
+    @include button-size($btn-padding-y-sml, $btn-padding-x-sml, $btn-font-size-sml, $border-radius-sml);
+}
+.btn-primary {
+    @include button-style($primary, $primary, $white)
+}
+.btn-danger {
+    @include button-style($danger, $danger, $white)
+}
+.btn-default {
+    @include button-style($white, $gray-400, $body-color, $white, $blue, $blue)
+}
+.btn-green {
+    @include button-style($green, $gray-400, $white, lighten($green,10%))
+}
+.btn-blue {
+    @include button-style($gloryBlue, $gray-400, $white, lighten($gloryBlue,10%))
+}
+.btn-red {
+    @include button-style($white, $gray-400, $gloryRed, $white)
+}
+.btn-link {
+    font-weight: $font-weight-normal;
+    color: $btn-link-color;
+    text-decoration: $btn-link-decoration;
+    box-shadow: none;
+    filter: none;
+    &:hover {
+        color: $btn-link-hover-color;
+        text-decoration: $btn-link-hover-decoration;
+    }
+    &:focus,
+    &.focus {
+        color: $btn-link-hover-color;
+        text-decoration: $btn-link-hover-decoration;
+    }
+    &:disabled,
+    &.disabled {
+        color: $btn-link-disabled-color;
+        text-decoration: none;
+    }
+}
+.btn-shadow{
+    filter: $btn-box-shadow;
+}
+.btn-checked{
+    @include button-style($gloryBlue, $gloryBlue, $white, lighten($gloryBlue,10%))
+}
+.conrol-group-btn{
+    //border-radius: $btn-border-radius;
+    //border: $btn-border-width solid $gray-400;
+}
+.group-btn{
+    //border:none;
+    
+    //border-right: $btn-border-width solid $gray-400;
+    //border-top: $btn-border-width solid $gray-400;
+    //border-bottom: $btn-border-width solid $gray-400;
+    border-radius: 0;
+    
+    &.group-button-first{
+        
+        border-right:none;
+        //border-left: $btn-border-width solid $gray-400;
+        border-radius: $btn-border-radius 0 0 $btn-border-radius;
+    }
+    &:not(.group-button-first,.group-button-last){
+        border-right:none;
+        &.btn-checked{
+            border-left: $btn-border-width solid $gray-400;
+        }
+    }
+    &.group-button-last{
+        //border-left:none;
+        border-radius: 0 $btn-border-radius $btn-border-radius 0;
+        &.btn-checked{
+            border-left: $btn-border-width solid $gray-400;
+        }
+    }
+    // &.btn-checked{
+    //     &:not(.group-button-first){
+            
+    //         border-left:$btn-border-width solid $gray-400;
+    //         //border-left: $btn-border-width solid $gray-400;
+    //     }
+    //     //border-bottom: $btn-border-width solid $gloryBlue;
+    // }
+}

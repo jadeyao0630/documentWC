@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, InputHTMLAttributes } from 'react';
+import React, { useState, useEffect, useRef, InputHTMLAttributes, FormEvent } from 'react';
 import Input from '../Input/input';
 import Icon from '../Icon/icon';import { fas } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -45,6 +45,8 @@ const Select: React.FC<SelectProps> = ({
   value,menuTitle,selectedItemColor, onChange,onKeydown,style }) => {
     const [dropdownVisible, setDropdownVisible] = useState(false);
     const [inputValue, setInputValue] = useState(value);
+    
+    const [editbleInputValue, setEditbleInputValue] = useState("");
     
     const [searchInputValue, setSearchInputValue] = useState('');
     const selectMenuRef = useRef<HTMLDivElement>(null);
@@ -99,7 +101,7 @@ const Select: React.FC<SelectProps> = ({
               values.push((item as HTMLInputElement).dataset.value);
             }
           })
-          setInputValue(values);
+          setInputValue(labels);
           console.log(e.target)
           onChange?.(values,labels);
       }
@@ -132,7 +134,7 @@ const Select: React.FC<SelectProps> = ({
           }
           newValues = (values as string[]).filter((item)=>item!=value)
         }
-        var labels=options?.filter(data=>newValues?.includes(data.value)).map(data => {
+        var labels=options?.filter(data=>newValues?.includes(data.label)).map(data => {
             return data.label;
         });
         onChange?.(labels,newValues);
@@ -143,13 +145,16 @@ const Select: React.FC<SelectProps> = ({
     const generateMultipleSelectedItems = () => {
       var items:SelectOption[] = [];
       if(inputValue!==undefined) {
+        console.log("inputValue",inputValue,inputValue.constructor,inputValue.includes("test"))
         if(inputValue?.constructor===String){
-          items = options.filter((option) => inputValue.split(',').includes(option.value));
+          items = options.filter((option) => inputValue.split(',').includes(option.label));
         }
         else{
-          items = options.filter((option) => inputValue.includes(option.value));
+          items = options.filter((option) => inputValue.includes(option.label));
+          console.log("inputValue1",items)
         }
       }
+      console.log("inputValue",items)
       return items.map(item=>{
         return (
           <SelectItem selectedItemColor={selectedItemColor} label={item.label} value={item.value} key={item.value} onDelete={handleOnItemDelete}></SelectItem>
@@ -190,18 +195,43 @@ const Select: React.FC<SelectProps> = ({
         // Remove from selected values
       }
     };
+    const handleEditbleInputChange = (e: React.ChangeEvent<HTMLInputElement>)=>{
+      setEditbleInputValue(e.target.value)
+    }
+    const handleKeyDown = (e:React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter') {
+        if(onKeydown!==undefined)
+          onKeydown(e)
+        
+        setInputValue((ee)=>{
+          console.log("setInputValue",ee)
+          if(ee!==undefined){
+            if(ee.constructor===String)
+              return [ee,(e.target as HTMLInputElement).value]
+            else if(ee.constructor===Array)
+              return [...ee,(e.target as HTMLInputElement).value]
+
+          }
+          else
+            return [(e.target as HTMLInputElement).value]
+        });
+        
+        setEditbleInputValue("")
+      }
+    }
+    console.log("dropdownVisible",dropdownVisible)
     return (
       <div className="gr-select" ref={ref} style={{...{ position: 'relative',display:'inline-block',verticalAlign:'middle',maxWidth:'200px',minWidth:'100px' },...style}} onFocus={() => {console.log('blur')}}>
 
-        <InputWrapper isShowClear={!isMultiple} inputValue={getInputValue()} onClear={handlInputClear} tabIndex={0}>
+        <InputWrapper isShowClear={isEditable} inputValue={getInputValue()} onClear={handlInputClear} tabIndex={0}>
             {isMultiple && <><div className='input-content-container' onFocus={() => console.log('blur1')}>{generateMultipleSelectedItems()}
             {isEditable && <Input
                 type="text"
-                //value={getInputValue()}
-                //onChange={handleInputChange}
-                onFocus={() => setDropdownVisible(true)}
+                value={editbleInputValue}
+                onChange={handleEditbleInputChange}
+                //onFocus={() => setDropdownVisible(true)}
                 autoComplete="off"
-                onKeyDown={onKeydown}
+                onKeyDown={handleKeyDown}
                 //placeholder={placeholder}
                 className="custom-input" />}
             </div>
@@ -247,7 +277,7 @@ const Select: React.FC<SelectProps> = ({
                         if(isMultiple){
                           visible = option.label.toLowerCase().includes(searchInputValue.toLowerCase());
                         }else{
-                          if(isEditable){
+                          if(isEditable && getInputValue().length>0){
                             visible = hasValueContains(option)
                           }else{
                             visible = true
@@ -260,7 +290,7 @@ const Select: React.FC<SelectProps> = ({
                       return (
                     <li
                         className={`select-item-li ${visible?'':'select-item-li-hidden'}`}
-                        key={option.value}
+                        key={option.value} 
                         onClick={(e) => handleDropdownSelect(e,option.value,option.label)}
                     >
                         {isMultiple ? (
@@ -270,13 +300,13 @@ const Select: React.FC<SelectProps> = ({
                               data-value={option.value} 
                               data-label={option.label} 
                               checked={inputValue?.constructor===Array?
-                                          (inputValue as string[]).includes(option.value):
-                                          inputValue!==undefined && (inputValue as string).split(',').includes(option.value)?true:false}
+                                          (inputValue as string[]).includes(option.label):
+                                          inputValue!==undefined && (inputValue as string).split(',').includes(option.label)?true:false}
                               onChange={(e) => handleCheckboxChange(option.value, (e.target as HTMLInputElement).checked)}/>
                               {option.label}
                             </label>
                           </div>
-                          ) : option.label}
+                          ) : <div style={{padding:'8px'}}>{option.label}</div>}
                     </li>
                     )})}
                 </ul>

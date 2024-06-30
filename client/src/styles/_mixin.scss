@@ -1,0 +1,83 @@
+@mixin button-size($padding-y, $padding-x, $font-szie, $border-radius){
+    padding:$padding-y $padding-x;
+    font-size: $font-szie;
+    border-radius: $border-radius;
+}
+@mixin button-style(
+    $background,
+    $border,
+    $color,
+    $hover-background: lighten($background, 7.5%),
+    $hover-border: lighten($border,10%),
+    $hover-color: lighten($color,10%),
+){
+    color: $color;
+    background: $background;
+    border-color: $border;
+    &:hover {
+        color: $hover-color;
+        background: $hover-background;
+        //border-color: $hover-border;
+    }
+    &:focus,
+    &.focus {
+        color: $hover-color;
+        background: $hover-background;
+        //border-color: $hover-border;
+    }
+
+    &:disabled,
+    &.disabled {
+        color: $color;
+        background: $background;
+        border-color: $border;
+    }
+}
+@mixin zoom-animation(
+    $direction: 'top',
+    $scaleStart: scalesY(0),
+    $scaleEnd: scaleY(1),
+    $origin: center top,
+){
+    .zoom-in-#{$direction}-enter {
+        opacity: 0;
+        transform: $scaleStart;
+    }
+    .zoom-in-#{$direction}-enter-active {
+        opacity: 1;
+        transform: $scaleEnd;
+        transition: transform 200ms cubic-bezier(0.23, 1, 0.320, 1) 100ms, opacity 200ms cubic-bezier(0.23, 1, 0.32, 1) 100ms;
+        transform-origin: $origin;
+    }
+    .zoom-in-#{$direction}-exit {
+        opacity: 1;
+    }
+    .zoom-in-#{$direction}-exit-active{
+        opacity: 0;
+        transform: $scaleStart;
+        transition: transform 200ms cubic-bezier(0.23, 1, 0.320, 1) 100ms, opacity 200ms cubic-bezier(0.23, 1, 0.32, 1) 100ms;
+        transform-origin: $origin;
+    }
+}
+@mixin fade-animation(
+    $direction: 'in',
+    $toVal: 1,
+    $fromVal: 0,
+){
+    .fade-#{$direction}-enter {
+        opacity: $fromVal;
+    }
+    .fade-#{$direction}-enter-active {
+        opacity: $toVal;
+        transition: opacity 300ms cubic-bezier(0.23, 1, 0.320, 1) 100ms;
+    }
+    .fade-#{$direction}-exit {
+        opacity: $toVal;
+    }
+    .fade-#{$direction}-exit-active{
+        opacity: $fromVal;
+        transition: opacity 300ms cubic-bezier(0.23, 1, 0.320, 1) 100ms;
+    }
+}
+
+

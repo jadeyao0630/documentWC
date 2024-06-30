@@ -10,7 +10,9 @@ const io = socketIo(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"]
-  }
+  },
+  // transports: ['websocket'], 
+  // path: '/socket.io',
 });
 
 const fs = require('fs');

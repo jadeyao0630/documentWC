@@ -18,7 +18,7 @@ const SelectItem: React.FC<SelectItemProps> = ({ label,value,onDelete,selectedIt
         setIsHovered(false);
       };
     return <div className="input-content" style={{background:selectedItemColor?selectedItemColor:'gray'}} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-                {label}{isHovered && <Icon className='input-content-close' icon="times" onClick={()=>onDelete?.(value)}></Icon>}
+                {label}{isHovered && <Icon className='input-content-close' icon="times" onClick={()=>onDelete?.(label)}></Icon>}
         </div>
 }
 export default SelectItem;

@@ -33,6 +33,9 @@
     padding:8px;
     border-bottom: 1px solid $gray-400;
 }
+.select-item-li {
+  
+}
   .gr-input-wrapper:focus-within{
     box-shadow: $focused-boxShadow;
   }
@@ -41,7 +44,6 @@
     background-color: transparent;
     padding: .3rem 0rem;
     margin: .2rem 0rem;
-    z-index: 999;
   }
   .custom-input:focus{
     filter:none;
