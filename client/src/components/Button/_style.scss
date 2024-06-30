@@ -44,10 +44,10 @@
     @include button-style($white, $gray-400, $body-color, $white, $blue, $blue)
 }
 .btn-green {
-    @include button-style($green, $gray-400, $white, lighten($green,10%))
+    @include button-style($green, $gray-400, $white, lighten($green,10%), lighten($green,10%))
 }
 .btn-blue {
-    @include button-style($gloryBlue, $gray-400, $white, lighten($gloryBlue,10%))
+    @include button-style($gloryBlue, $gray-400, $white, lighten($gloryBlue,10%), lighten($gloryBlue,10%))
 }
 .btn-red {
     @include button-style($white, $gray-400, $gloryRed, $white)

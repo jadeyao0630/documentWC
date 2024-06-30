@@ -603,7 +603,7 @@ const MTable: FC<ImTableProps> = (props) => {
             <Tooltip id='table-tooltips' ref={tooltipRef1} style={{zIndex:1001}}
             //id="table-tooltips"
             ></Tooltip>
-            {dialogMessage && <Dialog title="信息" onConfirm={handleConfirm}
+            {dialogMessage && <Dialog title="消息" onConfirm={handleConfirm}
                 message={dialogMessage}
                 onCancel={handleCancel} />}
             {message && (
@@ -624,7 +624,7 @@ const MTable: FC<ImTableProps> = (props) => {
                 <div className="modal">
                 <div className="modal-content">
                     <span className="close-button" onClick={closeModal}>&times;</span>
-                    <h2>{currentItem['docId']}</h2>
+                    <div style={{textAlign:"left",fontWeight:700}}>{currentItem['docId']}</div>
                     <div className="modal-form">
                         {createForm()}
                     </div>
