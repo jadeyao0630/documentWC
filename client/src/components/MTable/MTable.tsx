@@ -73,7 +73,7 @@ const tableColumns:Iobject={
         isEditble:true,
         width:300,
         style:{minWidth:200},
-        type:'text'
+        type:'textarea'
     },
     agent:{
         label:'责任者',
@@ -421,7 +421,7 @@ const MTable: FC<ImTableProps> = (props) => {
 
 
     }
-    const onTextChanged = (e:React.ChangeEvent<HTMLInputElement>,key:string,item:Iobject)=>{
+    const onTextChanged = (e:React.ChangeEvent<HTMLInputElement|HTMLTextAreaElement>,key:string,item:Iobject)=>{
         const updatedItem = { ...item, [key]: e.target.value };
         setCurrentItem(updatedItem);
     }
@@ -566,13 +566,16 @@ const MTable: FC<ImTableProps> = (props) => {
         return values?(values.constructor===String?getValuesFromLabels(values,columnData):[values]):(columnData.value?columnData.value:[])
     }
     const getItem = (columnData:ColumnData,key:string,item:Iobject) => {
+        const width=300
         if(columnData.type==="text"){
-            return <Input style={{width:250,margin:"5px 0px 5px 10px"}} type='text' name={key} value={item[key]} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{onTextChanged(e,key,item)}}/>
+            return <Input style={{width:width,margin:"5px 0px 5px 10px"}} type='text' name={key} value={item[key]} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{onTextChanged(e,key,item)}}/>
+        }else if(columnData.type==="textarea"){
+            return <textarea className="gr-textarea"  style={{width:width,margin:"5px 0px 5px 10px"}} name={key} value={item[key]} onChange={(e:React.ChangeEvent<HTMLTextAreaElement>)=>{onTextChanged(e,key,item)}}/>
         }else if (columnData.type==="combobox" || columnData.type==='multiCombobox'){
             console.log(item[key],item[key].constructor,item[key].constructor===String?getValuesFromLabels(item[key],columnData):item[key])
             return <Dropdown 
             defaultValues={getValues(item[key],columnData)}
-            style={{width:250,display:"inline-block",margin:"5px 0px 5px 10px",textAlign:'left'}}
+            style={{width:width,display:"inline-block",margin:"5px 0px 5px 10px",textAlign:'left'}}
             options={columnData.data?columnData.data:[]}
             isMulti={columnData.type==='multiCombobox'}
             showDropIndicator={columnData.type==='multiCombobox'}
@@ -581,7 +584,7 @@ const MTable: FC<ImTableProps> = (props) => {
             onAdd={(added)=>onTagAdded(added,key,item)}
             ></Dropdown>
         }
-        return <Input style={{width:250,margin:"5px 0px 5px 10px"}} type='text' name={key} value={item[key]} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{onTextChanged(e,key,item)}}/>
+        return <Input style={{width:width,margin:"5px 0px 5px 10px"}} type='text' name={key} value={item[key]} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{onTextChanged(e,key,item)}}/>
     }
     const onSelectValueChanged=(selectedOptions: SingleValue<OptionType> | MultiValue<OptionType>,key:string,item:Iobject) => {
         console.log(selectedOptions)

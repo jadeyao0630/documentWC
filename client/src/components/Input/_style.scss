@@ -130,11 +130,24 @@
     
   }
 .gr-input {
-    border:1px solid $gray-400;
+    border:1px solid hsl(0, 0%, 80%);
     padding:.45rem .3rem;
     border-radius:.3rem;
     text-align: left;
     vertical-align: middle;
+}
+.gr-textarea{
+    padding:.45rem .3rem;
+    border:1px solid hsl(0, 0%, 80%);
+    border-radius:.3rem;
+    text-align: left;
+    vertical-align: middle; 
+    resize: vertical;
+    &:focus{
+        outline: none;
+        filter:none;
+        box-shadow: $focused-boxShadow;
+    }
 }
 .gr-input:focus{
     outline: none;
