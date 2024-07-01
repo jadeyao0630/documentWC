@@ -53,7 +53,8 @@ const tableColumns:Iobject={
     project:{
         label:'所属项目',
         isEditble:true,
-        width:"auto",
+        width:140,
+        style:{maxWidth:140},
         type:'combobox',
         data:[],
         value:["0"]
@@ -61,22 +62,30 @@ const tableColumns:Iobject={
     category:{
         label:'分类',
         isEditble:true,
-        width:"auto",
+        width:140,
+        style:{maxWidth:140},
         type:'combobox',
         data:[],
         value:["0"]
     },
     title:{
-        label:'请示名称',
+        label:'名称',
         isEditble:true,
         width:300,
         style:{minWidth:200},
         type:'text'
     },
+    agent:{
+        label:'责任者',
+        isEditble:true,
+        width:"auto",
+        type:'text'
+    },
     person:{
         label:'经办人',
         isEditble:true,
-        width:"auto",
+        width:120,
+        style:{maxWidth:120},
         type:'text'
     },
     location:{
@@ -91,6 +100,13 @@ const tableColumns:Iobject={
         label:'更新日期',
         width:100,
         type:'date',
+        isHide:true
+    },
+    remark:{
+        label:'备注',
+        isEditble:true,
+        width:"auto",
+        type:'text'
     },
     description:{
         label:'标签',
@@ -142,6 +158,23 @@ const MTable: FC<ImTableProps> = (props) => {
 
     const [dialogVisible, setDialogVisible] = useState(false);
     const [dialogPromise, setDialogPromise] = useState<{ resolve: (value: boolean) => void, reject: () => void } | null>(null);
+    const [position, setPosition] = useState({left:0,top:0});
+
+  useEffect(() => {
+    const handleScroll = () => {
+        setPosition((p)=>{
+            p.left=window.scrollX
+            p.top=window.scrollY
+            return p
+        }
+        );
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
     const showDialog = (mesg:string|null) => {
         //setDialogVisible(true);
@@ -246,14 +279,16 @@ const MTable: FC<ImTableProps> = (props) => {
                 const urls: { [key: string]: string } = {};
                 const urls_thumb: { [key: string]: string } = {};
                 for (const item of search as Iobject[]) {
-                    const url = await fetch(`http://${serverIp}:${serverPort}/preview?folder=${item["docId"]}&fileName=thumb_${item["coverPage"]}`, {
-                        method: 'get',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        }
-                    }).then(response => response.url);
-                    urls[item["docId"]] = url.replace("thumb_","");
-                    urls_thumb[item["docId"]] = url;
+                    if(item["coverPage"]!==undefined && item["coverPage"]!==null && item["coverPage"].length>0){
+                        const url = await fetch(`http://${serverIp}:${serverPort}/preview?folder=${item["docId"]}&fileName=thumb_${item["coverPage"]}`, {
+                            method: 'get',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        }).then(response => response.url);
+                        urls[item["docId"]] = url.replace("thumb_","");
+                        urls_thumb[item["docId"]] = url;
+                    }
                 }
                 setImageURLs(urls);
                 setImageURLs_thumb(urls_thumb);
@@ -269,19 +304,21 @@ const MTable: FC<ImTableProps> = (props) => {
 
     const handleMouseEnter = (url: string,event:React.MouseEvent) => {
         setHoveredImage(url);
-        console.log(window.innerWidth,event.clientX + 10,popupRef.current,popupRef.current?.getBoundingClientRect());
-        //setPopupPosition({ top: 0, left: window.innerWidth/2});
+        console.log(url)
+        //console.log(window.innerWidth,event.clientX + 10,popupRef.current,popupRef.current?.getBoundingClientRect());
+        //setPopupPosition({ top: window.scrollY, left: 0});
     };
 
     const setTd = (index:number, key:string,item:Iobject) => {
         if(tableColumns.hasOwnProperty(key)){
             const type=tableColumns[key].type
-            var style:React.CSSProperties={textAlign:"left"}
+            var style:React.CSSProperties={...tableColumns[key]['style'],textAlign:"left"}
             if(tableColumns[key].isHide) style={...style, display:'none' }
             var td_item = item[key];
             if (type === "img") {
                 style = { padding: 0,textAlign:"center" };
-                td_item = imageURLs_thumb[item["docId"]] ? <img className="thumbnail" src={imageURLs_thumb[item["docId"]]} alt="coverPage" onClick={(e) => handleMouseEnter(imageURLs[item["docId"]],e)} /> : 'Loading...';
+                td_item = imageURLs_thumb[item["docId"]] ? <img className="thumbnail" src={imageURLs_thumb[item["docId"]]} alt="coverPage" onClick={(e) => handleMouseEnter(imageURLs[item["docId"]],e)} /> : 
+                (imageURLs_thumb[item["docId"]]?'Loading...':'');
             }else if (type === "date") {
                 td_item = formatDateTime(item[key],tableColumns[key].format);
             }
@@ -291,9 +328,13 @@ const MTable: FC<ImTableProps> = (props) => {
                         //data-tooltip-id={"table-tooltips"} 
                         //data-tooltip-content={td_item} 
                         style={style} 
-                        onMouseEnter={(e) => {
-                            if(e.target instanceof HTMLTableCellElement){
-                                const td = e.target as HTMLTableCellElement
+                        
+                        //title={tooltipVisible[index] ? td_item : ''}
+                        onDoubleClick={() => handleDoubleClick(item["docId"],key)}>
+                            <div 
+                        style={style} onMouseEnter={(e) => {
+                            if(e.target instanceof HTMLDivElement){
+                                const td = e.target as HTMLDivElement
                                 const isOverflowing = td.scrollWidth > td.clientWidth ;
                                 if(isOverflowing) {
                                     td.classList.add('has_tool_tip')
@@ -307,21 +348,23 @@ const MTable: FC<ImTableProps> = (props) => {
                             
                         }}
                         onMouseLeave={(e) => {
-                            if(e.target instanceof HTMLTableCellElement){
-                                const td = e.target as HTMLTableCellElement
+                            if(e.target instanceof HTMLDivElement){
+                                const td = e.target as HTMLDivElement
                                 td.classList.remove('has_tool_tip')
                                 tooltipRef1.current?.close()
                                 //console.log(tooltipRef1.current)
                             }
-                        }}
-                        //title={tooltipVisible[index] ? td_item : ''}
-                        onDoubleClick={() => handleDoubleClick(item["docId"],key)}>{td_item}</td>
+                        }}>
+
+                                {td_item}
+                            </div>
+                        </td>
         }return null
     }
     const setTh = (index:number, key:string) => {
         if(tableColumns.hasOwnProperty(key)){
             const columnData:ColumnData=tableColumns[key]
-            var style:React.CSSProperties={textAlign:"left"}
+            var style:React.CSSProperties={...tableColumns[key]['style'],textAlign:"left"}
             if(columnData.isHide) style={...style, display:'none' }
             if(columnData.width) style={...style, width: columnData.width }
             if(columnData.style) style={...style, ...columnData.style }
@@ -579,7 +622,7 @@ const MTable: FC<ImTableProps> = (props) => {
                         {headers.map((item, index) => (
                             setTh(index,item)
                         ))}
-                        <th key="action_btns" style={{ width: 50}}>功能</th>
+                        <th key="action_btns" style={{ width: 50,textAlign:"left"}}>功能</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -615,7 +658,7 @@ const MTable: FC<ImTableProps> = (props) => {
                 />
             )}
             {hoveredImage && (
-                <div className="popupImg" >
+                <div className="popupImg" style={{ top: `${position.top}px`,left: `${position.left}px`}}>
                     <span className="close-button" onClick={closePopup}>&times;</span>
                     <img ref={popupRef} src={hoveredImage} alt="Large preview" />
                 </div>

@@ -2,7 +2,9 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const path = require('path');
+const xlsx = require('xlsx');
 
+const moment = require('moment');
 const http = require('http');
 const socketIo = require('socket.io');
 const server = http.createServer(app);
@@ -241,6 +243,76 @@ app.post('/uploadImage', async (req, res) => {
     }
   });
 
+  app.post('/importExcel', upload.single('file'), async (req, res) => {
+    try {
+        const file = req.file;
+        const workbook = xlsx.readFile(file.path);
+        const sheetNames = workbook.SheetNames;
+        const timespanRecords=[]
+        var lastDate=undefined
+        const results=[]
+        // 遍历每个sheet
+        for (const sheetName of sheetNames) {
+            const worksheet = workbook.Sheets[sheetName];
+            //const mergeValueMap = handleMergedCells(worksheet);
+            const data = xlsx.utils.sheet_to_json(worksheet);
+
+            // 遍历每行数据
+            for (const row of data) {
+                if(row['日期']===undefined) row['日期']=lastDate?lastDate:moment().format('YYYY-MM-DD');
+                lastDate=row['日期']
+                const currentTime = moment().format('HH:mm:ss');
+                const converted = convertExcelDate(row['日期'])
+                var timespan = new Date(`${moment(converted).format('YYYY-MM-DD')} ${currentTime}`).getTime()/1000;
+                while (timespanRecords.includes(timespan)){
+                  timespan++;
+                }
+                timespanRecords.push(timespan)
+
+                console.log(row['日期'],`${moment(converted).format('YYYY-MM-DD')} ${currentTime}`,sheetName,converted)
+                const dateStr=converted.toISOString().slice(0, 19).replace('T', ' ')
+                const docId = timespan; // 用日期转化成timestamp
+                const createTime = dateStr;
+                const title = row['文件名称'] || row['请示名称'] || row['工程名称'] || row['图纸名称'] || row['合同名称'];
+                const category = sheetName;
+                const project = row['所属项目'];
+                const agent = row['出图单位'] || row['发文单位'] || row['责任人'] || row['签发单位'];
+                const person = row['经办人'] || row['存档人'] || row['规划院移交人'];
+                const location = row['存放位置'] || row['盒号'];
+                const remark = row['中标金额'] || row['抵扣工程合同清单'] || row['版本号'] || row['抵押物'] || row['原件或复印件'];
+
+                // 构建SQL插入语句
+                const query = `
+                    INSERT INTO documents_list (docId, createTime, title, category, project, agent, person, location, modifiedTime, remark)
+                    VALUES ('${docId}', '${createTime}', N'${title?title:''}', N'${category}', N'${project?project:''}', N'${agent?agent:''}', N'${person?person:''}', N'${location?location:''}', '${createTime}', N'${remark?remark:''}')
+                `;
+
+                // 执行SQL插入
+                try {
+                  console.log(query)
+                    const result = await db.mssqlExcute(query)
+                    results.push(result.data)
+                } catch (err) {
+                    console.error('SQL Error: ', err);
+                }
+            }
+            
+        }
+
+        res.json({data:results})
+        //res.send('File processed and data inserted into MSSQL');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error processing file');
+    }
+});
+const convertExcelDate = (excelDate) => {
+  // Excel's date system starts on 1900-01-01, but it treats 1900 as a leap year, which it isn't
+  const excelEpoch = new Date(1899, 11, 30); // 1899-12-30 is the correct epoch for Excel dates
+  const days = excelDate - 1; // adjust for Excel's leap year bug
+  const date = new Date(excelEpoch.getTime() + days * 24 * 60 * 60 * 1000);
+  return date;
+};
 app.listen(env.PORT, () => {
     console.log(`Server is running on port ${env.PORT}`);
   });

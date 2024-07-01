@@ -11,6 +11,7 @@ import { ActionMeta, MultiValue, SingleValue } from 'react-select';
 import {serverIp,serverPort} from './utils/config'
 import io from 'socket.io-client';
 import MTable from './components/MTable/MTable';
+import FileUpload from './components/FileUpload/FileUpload';
 library.add(fas)
 
 const socket = io(`http://${serverIp}:${serverPort}`,{
@@ -25,6 +26,7 @@ function App() {
     <div className="App">
       <DBLoaderProvider>
           <DBLoader databaseType={'mssql'} />
+          <FileUpload />
           <SearchBar/>
           <MTable/>
       </DBLoaderProvider>

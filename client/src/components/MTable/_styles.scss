@@ -9,20 +9,29 @@ table{
         //pointer-events: none;
         td,th{
             border-bottom: 1px solid #ddd;
-            white-space: nowrap;
+            
             padding:1rem .5rem;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 200px; /* 你可以根据需要调整这个值 */
-            cursor: pointer; /* 添加鼠标指针样式，表示可点击 */
             *{
                 vertical-align: middle;
             }
         }
+        th{
+            background-color: white;
+        }
         th:not(last-child){
             border-right: 2px solid #ddd;
             padding:.5rem .5rem;
+        }
+        td>div{
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px; /* 你可以根据需要调整这个值 */
+            cursor: pointer; /* 添加鼠标指针样式，表示可点击 */
         }
         td:hover {
             background-color: #f1f1f1; /* 添加悬停效果，增强用户体验 */
@@ -46,7 +55,7 @@ table{
     background: rgba(0, 0, 0, 0.8);
     padding: 10px;
     //border-radius: 5px;
-    z-index: 1000;
+    z-index: 1002;
     height:100%;
     width: 100%;
     .close-button{

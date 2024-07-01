@@ -26,6 +26,7 @@ const DatabaseLoader: React.FC<DatabaseLoaderProps> = (props) => {
             *
             from documents_list
             where isDisabled = 0
+            ORDER BY createTime DESC
             `})
         })
           .then(response => response.json())
