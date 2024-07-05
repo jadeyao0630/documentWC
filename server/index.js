@@ -4,6 +4,42 @@ const cors = require('cors');
 const path = require('path');
 const xlsx = require('xlsx');
 
+const CryptoJS = require('crypto-js')
+
+const keyStr = 'it@glory.com'
+const ivStr = 'it@glory.com'
+function encryptMD5(data) {
+  return CryptoJS.MD5(data).toString();
+}
+function decrypt(data, keyS, ivS) {
+  let key = keyS || keyStr
+  let iv = ivS || ivStr
+  key = CryptoJS.enc.Utf8.parse(key)
+  iv = CryptoJS.enc.Utf8.parse(iv)
+  const cipher = CryptoJS.AES.decrypt(data, key, {
+    iv: iv,
+    mode: CryptoJS.mode.CBC,
+    padding: CryptoJS.pad.Pkcs7,
+  })
+  const decrypted = cipher.toString(CryptoJS.enc.Utf8) // 返回的是加密之前的原始数据->字符串类型
+  return decrypted
+}
+
+function encrypt(data, keyS, ivS) {
+  let key = keyS || keyStr
+  let iv = ivS || ivStr
+  key = CryptoJS.enc.Utf8.parse(key)
+  iv = CryptoJS.enc.Utf8.parse(iv)
+  const src = CryptoJS.enc.Utf8.parse(data)
+  const cipher = CryptoJS.AES.encrypt(src, key, {
+    iv: iv, // 初始向量
+    mode: CryptoJS.mode.CBC, // 加密模式
+    padding: CryptoJS.pad.Pkcs7, // 填充方式
+  })
+  const encrypted = cipher.toString()
+  return encrypted
+}
+
 const moment = require('moment');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -13,6 +49,7 @@ const io = socketIo(server, {
     origin: "*",
     methods: ["GET", "POST"]
   },
+  //credentials: true,
   // transports: ['websocket'], 
   // path: '/socket.io',
 });
@@ -20,10 +57,7 @@ const io = socketIo(server, {
 const fs = require('fs');
 const multer = require('multer');
 const Jimp = require('jimp');
-const CryptoJS = require('crypto-js')
-function encryptMD5(data) {
-    return CryptoJS.MD5(data).toString();
-  }
+
 const { env } = process;
 require('dotenv').config({
   path: path.resolve(
@@ -138,6 +172,78 @@ app.post('/saveData',async(request,response) => {
     }
 
 });
+app.post('/getUser',async(request,response) => {
+  //console.log('request----',request);
+  const {type="mssql",userName,pass} = request.body;
+  const query = `
+    select * from user_list where userName='${userName}' and pass='${encrypt(pass,keyStr,ivStr)}'
+  `
+  try {
+      if(type==="mssql"){
+          const result = await db.mssqlGet(query)
+          response.json({data:result.data})
+      }else{
+          db.mysqlGet(query).then((res)=>{
+              if(!res.success) console.log(res)
+              response.json({data:res})
+          });
+      }
+      
+      //response.json({data:type,query:query})
+  }catch(err){
+      console.error('Database polling error:', err);
+      response.json({data:err})
+  }
+
+});
+app.post('/saveUser',async(request,response) => {
+  //console.log('request----',request);
+  const {type="mssql",data} = request.body;
+  console.log("saveUser",data)
+  const q_keys=[]
+  const q_skeys=[]
+  const q_values=[]
+  const q_valuesKeys=[]
+  var data_json=JSON.parse(data)
+  Object.keys(data_json).forEach(key=>{
+    if(key!=="id"){
+      q_keys.push(key)
+      q_skeys.push('source.'+key)
+      if(key==="pass") data_json[key]=encrypt(data_json[key],keyStr,ivStr);
+      q_values.push("'"+data_json[key]+"'")
+      q_valuesKeys.push(`${key} = source.${key}`)
+    }
+  })
+  const query=`
+        MERGE INTO user_list AS target
+        USING (VALUES (${q_values.join(", ")})) AS source (${q_keys.join(", ")})
+        ON target.userName = source.userName
+        WHEN MATCHED THEN
+            UPDATE SET ${q_valuesKeys.join(", ")}
+        WHEN NOT MATCHED THEN
+            INSERT (${q_keys.join(", ")})
+            VALUES (${q_skeys.join(", ")});
+        `
+  //console.log(type,query)
+  try {
+      if(type==="mssql"){
+          const result = await db.mssqlExcute(query)
+          response.json({data:result.data})
+      }else{
+          db.mysqlExcute(query).then((res)=>{
+              if(!res.success) console.log(res)
+              response.json({data:res})
+          });
+      }
+      
+      //response.json({data:type,query:query})
+  }catch(err){
+      console.error('Database polling error:', err);
+      response.json({data:err})
+  }
+
+});
+
 const sqlFilePath = './createDB.sql';
 const sqlQuery = fs.readFileSync(sqlFilePath, 'utf8');
 

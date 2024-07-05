@@ -20,7 +20,7 @@ BEGIN
         createTime DATETIME,
         modifiedTime DATETIME,
         description NVARCHAR(1000) default '',
-        remark NVARCHAR(1000),
+        remark NVARCHAR(1000) default '',
         coverPage NVARCHAR(1000) default '',
         attachement NVARCHAR(1000) default '',
         isDisabled BIT default 0,
@@ -60,5 +60,17 @@ BEGIN
         id INT IDENTITY(1,1) PRIMARY KEY,
         name NVARCHAR(1000),
         isDisabled BIT default 0,
+    )
+END
+
+IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='user_list' AND xtype='U')
+BEGIN
+    CREATE TABLE user_list (
+        id INT IDENTITY(1,1),
+        name NVARCHAR(1000),
+        userName NVARCHAR(255),
+        pass NVARCHAR(1000),
+        isDisabled BIT default 0,
+        PRIMARY KEY (id, userName)
     )
 END

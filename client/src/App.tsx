@@ -15,7 +15,7 @@ import FileUpload from './components/FileUpload/FileUpload';
 library.add(fas)
 
 const socket = io(`http://${serverIp}:${serverPort}`,{
-    
+    //withCredentials:true,
   // path: '/socket.io', // Ensure the path matches the server configuration
   // transports: ['websocket'], // Use WebSocket as the transport protocol
 }); 
@@ -26,7 +26,7 @@ function App() {
     <div className="App">
       <DBLoaderProvider>
           <DBLoader databaseType={'mssql'} />
-          <FileUpload />
+          <FileUpload/>
           <SearchBar/>
           <MTable/>
       </DBLoaderProvider>

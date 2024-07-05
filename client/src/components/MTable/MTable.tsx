@@ -1,7 +1,7 @@
 import React, { FC,useState, useEffect, useRef } from "react";
 import { useDBload } from "../../utils/DBLoader/DBLoaderContext";
 import { findColumnByLabel, formatDateTime } from '../../utils/utils';
-import {serverIp,serverPort} from '../../utils/config'
+import {ColumnData,tableColumns,serverIp,serverPort} from '../../utils/config'
 
 import Input from "../Input/input";
 import Select, { SelectOption } from "../Select/Select";
@@ -24,110 +24,12 @@ interface ImageItem {
     id: string;
     fileName: string; // 假设每行数据中有一个fileName字段
   }
-  interface ColumnData {
-    label: string;
-    isEditble?: boolean; // 假设每行数据中有一个fileName字段
-    width:string|number;
-    type:string;
-    data:Array<any>;
-    value:Array<any>;
-    isHide:boolean;
-    style?:React.CSSProperties;
-  }
+  
 //const projects=["大兴","北七家","西铁营"]
 //const categories=["运营类","投资结算","营销类","物业中标通知书","审计文件","上市公司文件","股票债券文件","图纸类","招商文件"]
 const docTags=["请款","请示","大兴","北七家","西铁营"]
 //const locations=["销售类合同模板","苏州营销","北七家商品房精装修","北七家营销","物业公司运营文件"]
-const tableColumns:Iobject={
-    docId:{
-        label:'编号',
-        width:80,
-        type:'text'
-    },
-    createTime:{
-        label:'创建日期',
-        width:100,
-        type:'date',
-        format:'yyyy/mm/dd'
-    },
-    project:{
-        label:'所属项目',
-        isEditble:true,
-        width:140,
-        style:{maxWidth:140},
-        type:'combobox',
-        data:[],
-        value:["0"]
-    },
-    category:{
-        label:'分类',
-        isEditble:true,
-        width:140,
-        style:{maxWidth:140},
-        type:'combobox',
-        data:[],
-        value:["0"]
-    },
-    title:{
-        label:'名称',
-        isEditble:true,
-        width:300,
-        style:{minWidth:200},
-        type:'textarea'
-    },
-    agent:{
-        label:'责任者',
-        isEditble:true,
-        width:"auto",
-        type:'text'
-    },
-    person:{
-        label:'经办人',
-        isEditble:true,
-        width:120,
-        style:{maxWidth:120},
-        type:'text'
-    },
-    location:{
-        label:'位置',
-        isEditble:true,
-        width:"auto",
-        type:'combobox',
-        data:[],
-        value:["0"]
-    },
-    modifiedTime:{
-        label:'更新日期',
-        width:100,
-        type:'date',
-        isHide:true
-    },
-    remark:{
-        label:'备注',
-        isEditble:true,
-        width:"auto",
-        type:'text'
-    },
-    description:{
-        label:'标签',
-        isEditble:true,
-        width:200,
-        type:'multiCombobox',
-        data:[],
-        value:[]
-    },
-    coverPage:{
-        label:'封面页',
-        width:50,
-        type:'img'
-    },
-    attachement:{
-        label:'附件',
-        width:"auto",
-        type:'file',
-        isHide:true
-    },
-}
+
 
 
 //const serverIp='192.168.10.213'

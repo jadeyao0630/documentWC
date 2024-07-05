@@ -6,6 +6,7 @@ import InputWrapper from "../Input/InputWrapper";
 import Dropdown, { OptionType } from "../Select/Dropdown";
 import { MultiValue, SingleValue } from "react-select";
 import Button from "../Button/button";
+import {ColumnData,tableColumns} from "../../utils/config"
 
 export interface ISearchBarProps {
     className?: string;
@@ -52,7 +53,7 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
       }
     }
     const onSearchClicked =()=>{
-      var _selected:string[]|string;
+      var _selected:string[]=[];
       if(selected===null || (Array.isArray(selected) && selected.length===0) || (isOptionType(selected) && (selected as OptionType).label.length===0)) {
         setSearch(result?result:[])
         return;
@@ -62,22 +63,34 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
         //const searchStr = element.value.toLowerCase(); // Convert search string to lowercase for case-insensitive search
           
       }else{
-        _selected=(selected as OptionType).label.toLowerCase()
+        _selected=[(selected as OptionType).label.toLowerCase()]
       }
-
       const filteredResult = result?.filter((res: Iobject) => {
-        return Object.keys(res).some((key) => {
-          const value = res[key];
-          console.log("filteredResult",key,value)
-          if (typeof value === 'string') {
-            if(Array.isArray(_selected))
-              return _selected.find((sel)=>value.toLowerCase().includes(sel))!==undefined; // Convert value to lowercase for case-insensitive search
-            else{
-              return value.toLowerCase().includes(_selected); // Convert value to lowercase for case-insensitive search
-            }
+        var allTags:string[]=[]
+        Object.keys(res).forEach(key => {
+          if(tableColumns[key] && tableColumns[key].isFilterable){
+            if(key==="description"){
+              console.log(res[key])
+              allTags = [...allTags,...(res[key].split(",").map((tag:string)=>tag.trim().toLowerCase()))]
+            }else
+              allTags = [...allTags,res[key]]
           }
-          return false;
-        });
+          
+        })
+        console.log(_selected,allTags)
+        return _selected.every(selectedItem => allTags.find(tag=>tag!==null &&tag.length>0 && tag.includes(selectedItem)) !== undefined);
+        // return Object.keys(res).some((key) => {
+        //   const value = res[key];
+        //   console.log("filteredResult",key,value)
+        //   if (typeof value === 'string') {
+        //     if(Array.isArray(_selected))
+        //       return _selected.find((sel)=>value.toLowerCase().includes(sel))!==undefined; // Convert value to lowercase for case-insensitive search
+        //     else{
+        //       return value.toLowerCase().includes(_selected); // Convert value to lowercase for case-insensitive search
+        //     }
+        //   }
+        //   return false;
+        // });
       });
       if (filteredResult === undefined) {
         setSearch([]);
