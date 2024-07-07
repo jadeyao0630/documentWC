@@ -13,6 +13,7 @@ interface DropdownProps {
   options: OptionType[];
   isMulti?: boolean;
   showInput?:boolean;
+  isClearable?:boolean;
   showDropIndicator?:boolean;
   placeholder?:string;
   style?:React.CSSProperties;
@@ -108,7 +109,7 @@ const getMarginValues = (style: React.CSSProperties) => {
   
     return margins;
   };
-const Dropdown: React.FC<DropdownProps> = ({ options, isMulti,showInput,showDropIndicator,defaultValues,style={margin:10},placeholder="请选择", onChange, onAdd }) => {
+const Dropdown: React.FC<DropdownProps> = ({ options, isMulti,isClearable=true,showInput,showDropIndicator,defaultValues,style={margin:10},placeholder="请选择", onChange, onAdd }) => {
     
 const customStyles: StylesConfig<OptionType> = {
     container:(provided) => ({
@@ -217,7 +218,7 @@ const customStyles: StylesConfig<OptionType> = {
       closeMenuOnSelect={!isMulti}
       placeholder={placeholder}
       noOptionsMessage={()=>"没有更多"}
-      isClearable
+      isClearable={isClearable}
     />
   );
 };

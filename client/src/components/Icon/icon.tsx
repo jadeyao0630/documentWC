@@ -1,6 +1,7 @@
 import React from 'react';
 import classNames from 'classnames'
 import { FontAwesomeIcon, FontAwesomeIconProps } from '@fortawesome/react-fontawesome';
+import { CssStyleClass } from '@fortawesome/fontawesome-svg-core';
 
 export type ThemeProps = 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'danger' | 'light' | 'dark' |
 "blue"| "indigo" | "purple" | "pink" | "red" | "gloryRed" | "orange" | "yellow" | "green" | "teal" | "cyan" | "white"
@@ -8,6 +9,7 @@ export type ThemeProps = 'primary' | 'secondary' | 'success' | 'info' | 'warning
 export interface IconProps extends FontAwesomeIconProps {
     /** 图标颜色 */
     theme?: ThemeProps,
+    className?:string|undefined,
     /** 图标是否旋转 */
     spin?:boolean,
 }

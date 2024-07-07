@@ -1,0 +1,19 @@
+.form-user-register{
+    width: 100%;
+}
+.form-item-container{
+    width: 100%;
+    display:grid;
+    grid-template-columns: 80px 1fr;
+    margin-bottom: 10px;
+    label{
+        display: grid;
+        align-content: center;
+        text-align: right;
+        margin-right: 10px;
+    }
+}
+.form-submiter{
+    width:150px;
+    margin-top: 20px;
+}

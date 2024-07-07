@@ -5,7 +5,7 @@ import { Iobject } from '../../components/MTable/MTable';
 type databaseType = 'mysql' | 'mssql'
 
 // 定义上下文中的值的类型
-interface DBLoaderContextType {
+export interface DBLoaderContextType {
 //   databaseType:databaseType
 //   setDatabaseType:(type:databaseType)=>void;
   result?:Array<Iobject>;

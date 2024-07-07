@@ -107,7 +107,7 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
       })):[])
     },[tags])
     console.log("tags",tags,_tags)
-    return <div style={{display:"grid",gridTemplateColumns:"1fr auto"}}>
+    return <div style={{display:"grid",gridTemplateColumns:"1fr auto",position:"fixed",top:"49px",width:"100%",background:"white",zIndex:"999"}}>
       <Dropdown 
         style={{margin:"5px 0px 5px 5px",textAlign:'left'}}
         options={_tags}
@@ -118,7 +118,7 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
         onAdd={onTagAdded}
         placeholder="请输入关键字"
         ></Dropdown>
-    <Button style={{margin:5}} onClick={onSearchClicked}>搜索</Button>
+    <Button style={{margin:5}} btnType="green" onClick={onSearchClicked}>搜索</Button>
     </div>
       //<Input type="search" style={{display:'block',margin:'10px'}} onChange={searchChange} autoComplete="off"/>;
             

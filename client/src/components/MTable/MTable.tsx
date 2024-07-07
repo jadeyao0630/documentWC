@@ -11,6 +11,7 @@ import { MultiValue, SingleValue } from "react-select";
 import ReactTooltip ,{ Tooltip, TooltipRefProps } from "react-tooltip";
 import MessageBox from "../MessageBox/MessageBox";
 import Dialog from "../Dialog/Dialog";
+import Icon from "../Icon/icon";
 
 // import classNames from "classnames";
 
@@ -34,7 +35,6 @@ const docTags=["请款","请示","大兴","北七家","西铁营"]
 
 //const serverIp='192.168.10.213'
 //const serverPort = '4555'
-
 const MTable: FC<ImTableProps> = (props) => {
     const { className } = props;
     const { 
@@ -62,6 +62,46 @@ const MTable: FC<ImTableProps> = (props) => {
     const [dialogPromise, setDialogPromise] = useState<{ resolve: (value: boolean) => void, reject: () => void } | null>(null);
     const [position, setPosition] = useState({left:0,top:0});
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(15);
+    const [goToPage, setGoToPage] = useState(1);
+
+  const handlePreviousPage = () => {
+    setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
+    setGoToPage((prevPage) => Math.max(prevPage - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    if(search!==undefined){
+        setCurrentPage((prevPage) => Math.min(prevPage + 1, Math.ceil(search.length / itemsPerPage)));
+        
+        setGoToPage((prevPage) => Math.min(prevPage + 1, Math.ceil(search.length / itemsPerPage)));
+    }
+  };
+  const handleGoToPageSubmit = (e: React.KeyboardEvent) => {
+    //e.preventDefault();
+    if(search!==undefined && e.code.toUpperCase()==="ENTER"){
+        const pageNumber = goToPage;
+        if (!isNaN(pageNumber) && pageNumber >= 1 && pageNumber <= Math.ceil(search.length / itemsPerPage)) {
+        setCurrentPage(pageNumber);
+        }
+        setGoToPage(pageNumber);
+    }
+  };
+  const handleGoToPageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setGoToPage(Number(e.target.value));
+  };
+  const handleItemsPerPageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value, 10);
+    if (!isNaN(value) && value > 0) {
+      setItemsPerPage(value);
+      setCurrentPage(1); // Reset to the first page
+    }
+  };
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedData = search?.slice(startIndex, startIndex + itemsPerPage);
+  //setSearch(paginatedData?paginatedData:[])
+
   useEffect(() => {
     const handleScroll = () => {
         setPosition((p)=>{
@@ -86,7 +126,7 @@ const MTable: FC<ImTableProps> = (props) => {
         });
     };
 
-    console.log("result",search,tooltipVisible)
+    console.log("result",paginatedData,tooltipVisible)
     const openModal = (id: any) => {
         const filteredResult = result?.filter((res: Iobject) => res['docId'] === id);
         if(filteredResult!==undefined && filteredResult.length>0){
@@ -520,7 +560,7 @@ const MTable: FC<ImTableProps> = (props) => {
         setDialogMessage(null)
     };
     return (
-        <div>
+        <div style={{marginTop:"47px"}}>
             <table>
                 <thead>
                     <tr key="header_tr">
@@ -531,7 +571,7 @@ const MTable: FC<ImTableProps> = (props) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {search?.map((item:Iobject, index) => (
+                    {paginatedData?.map((item:Iobject, index) => (
                         <tr key={index}>
                             {headers.map((key, subIndex) => (
                                 setTd(subIndex,key,item)
@@ -583,6 +623,36 @@ const MTable: FC<ImTableProps> = (props) => {
                 </div>
                 </div>
             )}
+            <div className="pagination">
+                <Button onClick={handlePreviousPage} disabled={currentPage === 1}>
+                <Icon icon="angle-left"/>
+                </Button>
+                <span>
+                第 <Input style={{width:"60px"}} type="number" value={goToPage}
+            onChange={handleGoToPageChange} onKeyDown={handleGoToPageSubmit} min="1" max={Math.ceil(search.length / itemsPerPage)} /> 页/ {Math.ceil(search.length / itemsPerPage)}
+                </span>
+                <Button onClick={handleNextPage} disabled={currentPage === Math.ceil(search?.length / itemsPerPage)}>
+                <Icon icon="angle-right"/>
+                </Button>
+                <div style={{display:"inline-block",marginLeft:"10px"}}>
+                    <label>
+                        每页
+                        <Input
+                        type="number"
+                        value={itemsPerPage}
+                        style={{margin:"0px 5px",width:"80px"}}
+                        onChange={handleItemsPerPageChange}
+                        // onKeyDown={(e) => {
+                        //     if (e.key === 'Enter') {
+                        //     e.preventDefault();
+                        //     handleItemsPerPageChange(e as unknown as React.ChangeEvent<HTMLInputElement>);
+                        //     }
+                        // }}
+                        />
+                        项
+                    </label>
+                </div>
+            </div>
         </div>
         
     );

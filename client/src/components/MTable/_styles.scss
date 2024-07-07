@@ -2,6 +2,7 @@ table{
     border-spacing: 0;
     position: relative;
     width:100%;
+    background-color: white;
     //height:calc( 100% - 60px);
     tr{
         //z-index: 2;
@@ -43,9 +44,9 @@ table{
         // }
     }
     thead{
-        position: sticky;
-        top:0;
-        z-index:3;
+        position:sticky;
+        top:97px;
+        z-index: 99;
     }
 }
 .popupImg {
@@ -123,4 +124,24 @@ table{
     &:hover{
         color:$blue
     }
+  }
+
+  .pagination {
+    padding-top: 10px;
+    
+    padding-bottom: 10px;
+    position: fixed;
+    bottom:0;
+    background-color: white;
+    box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.2);
+    width:100%;
+  }
+  
+  .pagination button {
+    margin: 0 5px;
+    padding: 5px 10px;
+  }
+  
+  .pagination span {
+    margin: 0 10px;
   }

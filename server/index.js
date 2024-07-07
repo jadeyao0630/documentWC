@@ -386,16 +386,49 @@ app.post('/uploadImage', async (req, res) => {
                 const person = row['经办人'] || row['存档人'] || row['规划院移交人'];
                 const location = row['存放位置'] || row['盒号'];
                 const remark = row['中标金额'] || row['抵扣工程合同清单'] || row['版本号'] || row['抵押物'] || row['原件或复印件'];
-
+                const values = {
+                  docId:timespan,
+                  createTime : dateStr,
+                  title : row['文件名称'] || row['请示名称'] || row['工程名称'] || row['图纸名称'] || row['合同名称'],
+                  category : sheetName,
+                  project : row['所属项目'],
+                  agent : row['出图单位'] || row['发文单位'] || row['责任人'] || row['签发单位'],
+                  person : row['经办人'] || row['存档人'] || row['规划院移交人'],
+                  location : row['存放位置'] || row['盒号'],
+                  remark : row['中标金额'] || row['抵扣工程合同清单'] || row['版本号'] || row['抵押物'] || row['原件或复印件']
+                }
+                const keys=[]
+                const sourceKeys=[]
+                const vals=[]
+                const setVals=[]
+                Object.keys(values).forEach(key=>{
+                  keys.push(key)
+                  sourceKeys.push(`source.${key}`)
+                  var v=`N'${values[key]?values[key]:""}'`
+                  if(key==="docId" || key==="createTime" || key==="modifiedTime"){
+                    v=`'${values[key]?values[key]:""}'`
+                  }
+                  vals.push(v)
+                  if(key!=="title" && key!=="createTime")
+                    setVals.push(key + " = " + v)
+                })
                 // 构建SQL插入语句
-                const query = `
-                    INSERT INTO documents_list (docId, createTime, title, category, project, agent, person, location, modifiedTime, remark)
-                    VALUES ('${docId}', '${createTime}', N'${title?title:''}', N'${category}', N'${project?project:''}', N'${agent?agent:''}', N'${person?person:''}', N'${location?location:''}', '${createTime}', N'${remark?remark:''}')
-                `;
-
+                // const query = `
+                //     INSERT INTO documents_list (docId, createTime, title, category, project, agent, person, location, modifiedTime, remark)
+                //     VALUES ('${docId}', '${createTime}', N'${title?title:''}', N'${category}', N'${project?project:''}', N'${agent?agent:''}', N'${person?person:''}', N'${location?location:''}', '${createTime}', N'${remark?remark:''}')
+                // `;
+                const query = `MERGE INTO documents_list AS target
+                USING (VALUES (${vals.join(", ")})) 
+                AS source (${keys.join(", ")})
+                ON target.title = source.title AND target.createTime = source.createTime
+                WHEN MATCHED THEN
+                    UPDATE SET ${setVals.join(", ")}
+                WHEN NOT MATCHED THEN
+                    INSERT (${keys.join(", ")})
+                    VALUES (${sourceKeys.join(", ")});`
                 // 执行SQL插入
                 try {
-                  console.log(query)
+                  //console.log(query)
                     const result = await db.mssqlExcute(query)
                     results.push(result.data)
                 } catch (err) {
