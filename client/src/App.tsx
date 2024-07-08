@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import logo from './logo.svg';
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
@@ -20,14 +20,15 @@ import HeaderMenuItem from './components/Header/HeaderMenuItem';
 import Button from './components/Button/button';
 import Input from './components/Input/input';
 import { isObject } from 'util';
+import { Tooltip } from 'react-tooltip';
 
 library.add(fas)
 
-const socket = io(`http://${serverIp}:${serverPort}`,{
-    //withCredentials:true,
-  // path: '/socket.io', // Ensure the path matches the server configuration
-  // transports: ['websocket'], // Use WebSocket as the transport protocol
-}); 
+// const socket = io(`http://${serverIp}:${serverPort}`,{
+//     //withCredentials:true,
+//   // path: '/socket.io', // Ensure the path matches the server configuration
+//   // transports: ['websocket'], // Use WebSocket as the transport protocol
+// }); 
 
 function App() {
   const [showPopup, setShowPopup] = useState<string|undefined>(undefined);
@@ -37,6 +38,9 @@ function App() {
   const [optionIndex,setOptionIndex] = useState<string>()
   const [showHeaderMenu, setShowHeaderMenu] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [tableMarginTop, setTableMarginTop] = useState(48);
+  
+  const scrollableContainerRef = useRef<HTMLUListElement>(null);
   
   const MenuItemClicked = (e:React.MouseEvent<HTMLAnchorElement>,data:DBLoaderContextType)=>{
     e.preventDefault(); 
@@ -52,6 +56,7 @@ function App() {
         optionList.tags=tags
         optionList.locations=locations
         optionList.categories=categories
+        console.log("optionList",optionList)
         setOptionData(optionList)
         setOptionOriginalData(optionList)
       }
@@ -94,6 +99,7 @@ function App() {
         <h4 style={{marginBottom:"10px", marginTop:"10px"}}>编辑选项</h4>
         <span className="close-button" onClick={()=>{setOptionIndex(undefined);setShowPopup(undefined)}}>&times;</span>
         <div style={{margin:"20px 20px"}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr auto",alignItems:"center"}}>
             <Dropdown 
               style={{margin:"5px 0px 5px 5px",textAlign:'left'}}
               options={[
@@ -109,10 +115,14 @@ function App() {
                 if(e!==null)
                   setOptionIndex((e as OptionType).value)
               }}></Dropdown>
-          {optionData && optionIndex && optionData[optionIndex] && <ul style={{overflowY:"auto",maxHeight:"200px",marginTop:"20px"}}>
+              <Button data-tooltip-id='main-tooltips' data-tooltip-content={"添加选项"} style={optionIndex?{color:"#1362B7",height:"35px",width:"35px",marginLeft:"5px"}:{display:"none"}} onClick={(e)=>{
+                  if(optionIndex!==undefined) handleAddItem(optionIndex)
+                }}><Icon icon={"plus"}></Icon></Button>
+              </div>
+          {optionData && optionIndex && optionData[optionIndex] && <ul ref={scrollableContainerRef} style={{overflowY:"auto",maxHeight:"200px",marginTop:"20px"}}>
             {optionData[optionIndex].map((opt:Iobject,idx:number)=>{
               console.log(opt)
-              return <li style={
+              return <li key={idx} style={
                 {...{display:"grid",gridTemplateColumns:"1fr auto auto auto",marginTop:"5px",alignItems:"center",textAlign:"left",border:"1px solid #ddd",paddingLeft:"10px",borderRadius:"5px",marginLeft:"-28px"},
                 ...(optionOriginalData[optionIndex].length-1===idx)?{marginBottom:"5px"}:{}}
                 }>
@@ -122,23 +132,35 @@ function App() {
                   //setOptionData({...optionData,[optionIndex]:{...opt,name:(e.currentTarget as HTMLInputElement).value}})
                   //opt.name=(e.currentTarget as HTMLInputElement).value
                   }}></Input>
-                <Button style={optionOriginalData[optionIndex].length-1===idx?{color:"#1362B7",border:"none",boxShadow:"none"}:{display:"none"}} onClick={(e)=>{
-                  handleAddItem(optionIndex)
-                }}><Icon icon={"plus"}></Icon></Button>
-                <Button style={optionOriginalData[optionIndex][idx].name===opt.name?{display:"none"}:{color:"green",border:"none",boxShadow:"none"}} onClick={(e)=>saveChanges(optionIndex,idx)}><Icon icon={"check"}></Icon></Button>
-                <Button btnType='red' style={{border:"none",boxShadow:"none"}}><Icon icon={"times"}></Icon></Button>
+                
+                <Button data-tooltip-id='main-tooltips' data-tooltip-content={"保存修改"} style={optionOriginalData[optionIndex][idx] && optionOriginalData[optionIndex][idx].name===opt.name?{display:"none"}:{color:"green",border:"none",boxShadow:"none"}} 
+                  onClick={(e)=>saveChanges(optionIndex,idx)}><Icon icon={opt.isDisabled?"sync":"check"}></Icon></Button>
+                <Button data-tooltip-id='main-tooltips' data-tooltip-content={"禁用选项"} btnType='red' style={{border:"none",boxShadow:"none"}}><Icon icon={"times"}></Icon></Button>
               </li>
             })}
           </ul>}
         </div>
+        <Tooltip id='main-tooltips' style={{zIndex:1001}}/>
       </div>
     )
   }
+  const getMaxIdItem = (items: Iobject[]): Iobject | undefined => {
+    return items.reduce((max, item) => (item.id > max.id ? item : max), items[0]);
+  };
   const handleAddItem = (key:string) => {
-
-    optionData[key].push({ ...optionData[key][optionData[key].length-1], name: "" })
-    console.log("newOptionData",optionData[key])
-    setOptionData({...optionData,[key]:optionData[key]});
+    const lastItem=getMaxIdItem(optionData[key]);
+    if(lastItem!==undefined){
+      optionData[key].push({ ...lastItem, name: "",id: lastItem.id+1})
+      console.log("newOptionData",optionData[key])
+      setOptionData((opt)=>({...opt,[key]:optionData[key]}));
+      setTimeout(() => {
+        
+      const scrollableContainer = scrollableContainerRef.current;
+      if (scrollableContainer) {
+        scrollableContainer.scrollTop = scrollableContainer.scrollHeight;
+      }
+      }, 500);
+    }
   };
   const handleInputChange = (key:string,index: number, value: string) => {
 
@@ -149,22 +171,59 @@ function App() {
           
     )))
     console.log("newOptionData",newOptionData)
-    setOptionData({...optionData,[key]:newOptionData});
+    setOptionData((opt)=>({...opt,[key]:newOptionData}));
   };
   const saveChanges = (key:string,index: number) => {
     if(_data!==undefined && optionData!==undefined){
-      const {projects,setProjects} =_data
-      if(projects!==undefined){
-        if(index>projects.length-1){
-          projects?.push(optionData[key][index])
-          setProjects(projects)
-        }else{
+      if(key==="projects"){
+        const {projects,setProjects} =_data
+        if(projects!==undefined){
+          if(index>projects.length-1){
+            projects?.push(optionData[key][index])
+            setProjects(projects)
+          }else{
 
-          setProjects(projects?.map((p:Iobject,idx:number)=>
-            {return idx === index? optionData[key][index]:p}
-          ))
+            setProjects(projects?.map((p:Iobject,idx:number)=>
+              {return idx === index? optionData[key][index]:p}
+            ))
+          }
+
+        }
+      }else if(key==="categories"){
+        const {categories,setCategories} =_data
+        if(categories!==undefined){
+          console.log("saveChanges",optionData[key][index],(index>categories.length-1),optionData[key],categories)
+          if(index>categories.length-1){
+            categories?.push(optionData[key][index])
+            setCategories(categories)
+          }else{
+
+            setCategories(categories?.map((p:Iobject,idx:number)=>
+              {return {...p,...optionData[key][idx]}}
+          
+            ))
+          }
+        }
+      }else if(key==="locations"){
+        const {locations,setLocations} =_data
+        if(locations!==undefined){
+          if(index>locations.length-1){
+            locations?.push(optionData[key][index])
+            setLocations(locations)
+          }else{
+
+            setLocations(locations?.map((p:Iobject,idx:number)=>
+              {return idx === index? optionData[key][index]:p}
+          
+            ))
+          }
         }
       }
+      setOptionOriginalData((opt)=>({...opt,[key]:opt[key].map((op:Iobject,id:number)=>(
+        id === index 
+          ? optionData[key][index]
+          : op
+      ))}));
       
     }
   }
@@ -173,7 +232,7 @@ function App() {
     <div className="App">
       <div style={{ paddingTop: '50px' }}>
         <DBLoaderProvider>
-            <Header title="档案归档" isMenuOpen={showHeaderMenu} >
+            <Header title="档案归档" isMenuOpen={showHeaderMenu}>
               <HeaderMenuItem items={[
                 {icon:"user-plus",label:"注册账户",color:"#1362B7",id:"register",onClicked:MenuItemClicked},
                 {icon:"upload",label:"导入数据",color:"#348a09",id:"import",onClicked:MenuItemClicked},
@@ -183,8 +242,8 @@ function App() {
               
             </Header>
             <DBLoader databaseType={'mssql'} />
-            <SearchBar/>
-            <MTable/>
+            <SearchBar onSizeChanged={setTableMarginTop}/>
+            <MTable style={{marginTop:tableMarginTop}}/>
         </DBLoaderProvider>
       </div>
       {showPopup && 

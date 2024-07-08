@@ -17,6 +17,7 @@ import Icon from "../Icon/icon";
 
 export interface ImTableProps {
     className?: string;
+    style?: React.CSSProperties;
 }
 export interface Iobject {
     [key: string]: any;
@@ -36,8 +37,9 @@ const docTags=["请款","请示","大兴","北七家","西铁营"]
 //const serverIp='192.168.10.213'
 //const serverPort = '4555'
 const MTable: FC<ImTableProps> = (props) => {
-    const { className } = props;
+    const { className,style } = props;
     const { 
+        setReload,
         result,search,setResult,setSearch,
         categories,setCategories,
         projects,setProjects,
@@ -98,6 +100,7 @@ const MTable: FC<ImTableProps> = (props) => {
       setCurrentPage(1); // Reset to the first page
     }
   };
+  
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedData = search?.slice(startIndex, startIndex + itemsPerPage);
   //setSearch(paginatedData?paginatedData:[])
@@ -387,6 +390,7 @@ const MTable: FC<ImTableProps> = (props) => {
                       .then(response => response.json())
                       .then(data => {
                           console.log("saveData",data)
+                          setReload?.(new Date().getTime()/1000)
                           showMessage(data.data.rowsAffected.length>0?"删除完成":"删除失败")
                       })
                 }
@@ -560,7 +564,7 @@ const MTable: FC<ImTableProps> = (props) => {
         setDialogMessage(null)
     };
     return (
-        <div style={{marginTop:"47px"}}>
+        <div style={style}>
             <table>
                 <thead>
                     <tr key="header_tr">

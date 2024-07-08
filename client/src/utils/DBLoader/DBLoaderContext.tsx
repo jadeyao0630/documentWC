@@ -22,6 +22,8 @@ export interface DBLoaderContextType {
   setTags:(tags:Array<Iobject>)=>void;
   tagsToAdd?:Array<Iobject>;
   setTagsToAdd:(tagsToAdd:Array<Iobject>)=>void;
+  reload?:Number;
+  setReload?:(reload:Number)=>void
 }
 
 // 创建上下文
@@ -41,6 +43,7 @@ export const DBLoaderProvider: React.FC<DBLoaderProviderProps> = ({ children }) 
     const [locations, setLocations] = useState<Array<Iobject>>();
     const [tags, setTags] = useState<Array<Iobject>>();
     const [tagsToAdd, setTagsToAdd] = useState<Array<Iobject>>();
+    const [reload, setReload] = useState<Number>();
   return (
     <DBLoaderContext.Provider value={{ result, setResult,
                                         search, setSearch,
@@ -48,7 +51,8 @@ export const DBLoaderProvider: React.FC<DBLoaderProviderProps> = ({ children }) 
                                         categories, setCategories,
                                         locations, setLocations,
                                         tags, setTags,
-                                        tagsToAdd, setTagsToAdd}}>
+                                        tagsToAdd, setTagsToAdd,
+                                        reload, setReload}}>
       {children}
     </DBLoaderContext.Provider>
   );

@@ -22,10 +22,10 @@ const mssqlConfig = {
   };
   let pool = new mssql.ConnectionPool(mssqlConfig);
   var query=function(sql,callback){
-    console.log('mssqlQuery',sql)
+    //console.log('mssqlQuery',sql)
     pool.connect().then(()=>{
         pool.request().query(sql,function(err,results){
-            console.log('mssqlQuery',err,results)
+            //console.log('mssqlQuery',err,results)
             callback?.(err,results);
             //pool.close();
         })

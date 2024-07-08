@@ -10,37 +10,44 @@ import {ColumnData,tableColumns} from "../../utils/config"
 
 export interface ISearchBarProps {
     className?: string;
+    onSizeChanged?: (size: number) => void;
 }
 const SearchBar: FC<ISearchBarProps> = (props) => {
-    const { className } = props;
-    const { result,setSearch,tags,setTags } = useDBload();
+    const { className,onSizeChanged } = props;
+    const { result,setSearch,tags,setTags,projects,locations,categories } = useDBload();
     const [_tags,_setTags] = useState<OptionType[]>([]);
     const [selected,setSelected] = useState<SingleValue<OptionType> | MultiValue<OptionType>>([]);
-    const searchChange = (e:React.ChangeEvent<HTMLInputElement>)=>{
-        const searchStr = e.target.value.toLowerCase(); // Convert search string to lowercase for case-insensitive search
-        const filteredResult = result?.filter((res: Iobject) => {
-          return Object.keys(res).some((key) => {
-            const value = res[key];
-            if (typeof value === 'string') {
-              return value.toLowerCase().includes(searchStr); // Convert value to lowercase for case-insensitive search
-            }
-            return false;
-          });
-        });
-    
-        if (filteredResult === undefined) {
-          setSearch([]);
-        } else {
-          setSearch(filteredResult);
-        }
-    }
+    const [selectedProj,setSelectedProj] = useState<SingleValue<OptionType> | MultiValue<OptionType>>([]);
+    const [selectedCate,setSelectedCate] = useState<SingleValue<OptionType> | MultiValue<OptionType>>([]);
+    const [selectedLoca,setSelectedLoca] = useState<SingleValue<OptionType> | MultiValue<OptionType>>([]);
+    const self = useRef<HTMLDivElement>(null);
+    const delay = 300;
     const isOptionType = (option: any): option is OptionType => {
       return option && typeof option.label === "string" && typeof option.value === "string";
     };
     const _searchChange = (selectedOptions: SingleValue<OptionType> | MultiValue<OptionType>)=>{
         console.log("_searchChange",selectedOptions)
         setSelected(selectedOptions)
-        
+        setTimeout(()=>onSizeChanged?.(self.current?self.current.clientHeight:48),delay)
+    }
+    const _projChange = (selectedOptions: SingleValue<OptionType> | MultiValue<OptionType>)=>{
+      console.log("_projChange",selectedOptions)
+      console.log(self?.current?.clientHeight);
+      setSelectedProj(selectedOptions)
+      setTimeout(()=>onSizeChanged?.(self.current?self.current.clientHeight:48),delay)
+      
+    }
+    const _cateChange = (selectedOptions: SingleValue<OptionType> | MultiValue<OptionType>)=>{
+      console.log("_cateChange",selectedOptions)
+      setSelectedCate(selectedOptions)
+      setTimeout(()=>onSizeChanged?.(self.current?self.current.clientHeight:48),delay)
+      
+    }
+    const _locaChange = (selectedOptions: SingleValue<OptionType> | MultiValue<OptionType>)=>{
+      console.log("_locaChange",selectedOptions)
+      setSelectedLoca(selectedOptions)
+      setTimeout(()=>onSizeChanged?.(self.current?self.current.clientHeight:48),delay)
+      
     }
     
     const onTagAdded = (added: OptionType)=>{
@@ -53,6 +60,12 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
       }
     }
     const onSearchClicked =()=>{
+      console.log(selectedProj,typeof(selectedProj),selectedProj?.constructor)
+      if(selectedProj!==null){
+        if(Array.isArray(selectedProj)){
+          //const 
+        }
+      }
       var _selected:string[]=[];
       if(selected===null || (Array.isArray(selected) && selected.length===0) || (isOptionType(selected) && (selected as OptionType).label.length===0)) {
         setSearch(result?result:[])
@@ -65,6 +78,9 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
       }else{
         _selected=[(selected as OptionType).label.toLowerCase()]
       }
+      const searchConditions={}
+      
+      
       const filteredResult = result?.filter((res: Iobject) => {
         var allTags:string[]=[]
         Object.keys(res).forEach(key => {
@@ -106,19 +122,57 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
         value: data.id.toString()
       })):[])
     },[tags])
-    console.log("tags",tags,_tags)
-    return <div style={{display:"grid",gridTemplateColumns:"1fr auto",position:"fixed",top:"49px",width:"100%",background:"white",zIndex:"999"}}>
-      <Dropdown 
-        style={{margin:"5px 0px 5px 5px",textAlign:'left'}}
-        options={_tags}
-        isMulti={true}
-        showDropIndicator={false}
-        showInput={true}
-        onChange={_searchChange}
-        onAdd={onTagAdded}
-        placeholder="请输入关键字"
-        ></Dropdown>
-    <Button style={{margin:5}} btnType="green" onClick={onSearchClicked}>搜索</Button>
+    //console.log("tags",tags,_tags)
+    return <div ref={self} style={{display:"flex",width:"100%",position:"fixed",top:"49px",background:"white",zIndex:"999"}}>
+                <Dropdown 
+                  style={{margin:"5px 0px 5px 5px",textAlign:'left',width:"400px"}}
+                  options={projects?projects.map((data) => ({
+                    label: data.name,
+                    value: data.id.toString()
+                  })):[]}
+                  isMulti={true}
+                  showDropIndicator={true}
+                  showInput={false}
+                  onChange={_projChange}
+                  placeholder="请选择项目"
+                ></Dropdown>
+                <Dropdown 
+                  style={{margin:"5px 0px 5px 5px",textAlign:'left',width:"400px"}}
+                  options={categories?categories.map((data) => ({
+                    label: data.name,
+                    value: data.id.toString()
+                  })):[]}
+                  isMulti={true}
+                  showDropIndicator={true}
+                  showInput={false}
+                  onChange={_cateChange}
+                  placeholder="请选择分类"
+                ></Dropdown>
+                <Dropdown 
+                  style={{margin:"5px 0px 5px 5px",textAlign:'left',width:"400px"}}
+                  options={locations?locations.map((data) => ({
+                    label: data.name,
+                    value: data.id.toString()
+                  })):[]}
+                  isMulti={true}
+                  showDropIndicator={true}
+                  showInput={false}
+                  onChange={_locaChange}
+                  placeholder="请选择位置"
+                ></Dropdown>
+            <div style={{display:"grid",gridTemplateColumns:"1fr auto",width:"100%"}}>
+              <Dropdown 
+                style={{margin:"5px 0px 5px 5px",textAlign:'left'}}
+                options={_tags}
+                isMulti={true}
+                showDropIndicator={false}
+                showInput={true}
+                onChange={_searchChange}
+                onAdd={onTagAdded}
+                placeholder="请输入关键字"
+                ></Dropdown>
+              <Button style={{margin:5}} btnType="green" onClick={onSearchClicked}>搜索</Button>
+          </div>
     </div>
       //<Input type="search" style={{display:'block',margin:'10px'}} onChange={searchChange} autoComplete="off"/>;
             

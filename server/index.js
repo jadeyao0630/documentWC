@@ -3,6 +3,7 @@ const app = express();
 const cors = require('cors');
 const path = require('path');
 const xlsx = require('xlsx');
+const WebSocket = require('ws');
 
 const CryptoJS = require('crypto-js')
 
@@ -39,7 +40,14 @@ function encrypt(data, keyS, ivS) {
   const encrypted = cipher.toString()
   return encrypted
 }
+const wss = new WebSocket.Server({ port: 3002 });
 
+wss.on('connection', (ws) => {
+  console.log('WebSocket connection established');
+  ws.on('message', (message) => {
+    console.log('received: %s', message);
+  });
+});
 const moment = require('moment');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -74,7 +82,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 var corsOptions = {
     origin: '*',
     credentials:true,
-    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+    optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+    
   }
 app.use(cors(corsOptions)).use((req,res,next)=>{
     res.setHeader('Access-Control-Allow-Origin',"*");
@@ -101,27 +110,6 @@ app.use(cors(corsOptions)).use((req,res,next)=>{
 const upload = multer({ dest: env.UPLOADS_PATH }); // 指定上传目录
 
 
-var _socket;
-var clients={};
-io.on('connection', (socket) => {
-
-  console.log('a user connected');
-  _socket=socket;
-  socket.on('disconnect', () => {
-    console.log('user disconnected',socket.id);
-    if(clients.hasOwnProperty(socket.id)){
-      delete clients[socket.id];
-    }
-    
-  });
-  socket.on('message', (data) => {
-    console.log('user login message: ',data,socket.id);
-    if(data!=null && data.recordLoginHistory==1){
-      clients[socket.id]=data;
-      io.emit('message', "wlecome "+data);
-    }
-  });
-});
 
 
 const DbService = require('./dbService');
@@ -151,12 +139,20 @@ app.post('/getData',async(request,response) => {
 });
 app.post('/saveData',async(request,response) => {
     //console.log('request----',request);
-    const {type="mssql",query="select * from p_Room"} = request.body;
+    const {type="mssql",query="select * from p_Room",notify=false} = request.body;
     
     //console.log(type,query)
     try {
         if(type==="mssql"){
             const result = await db.mssqlExcute(query)
+            console.log("saveData notify",notify)
+            if(notify){
+              wss.clients.forEach(client => {
+                if (client.readyState === WebSocket.OPEN) {
+                  client.send(JSON.stringify({ type:'table-item-add', status: 'success', data: result.data }));
+                }
+              });
+            }
             response.json({data:result.data})
         }else{
             db.mysqlExcute(query).then((res)=>{
@@ -350,13 +346,17 @@ app.post('/uploadImage', async (req, res) => {
   });
 
   app.post('/importExcel', upload.single('file'), async (req, res) => {
+    res.setHeader('Content-Type', 'application/json'); 
+    const results=[]
+    var currentSheet=""
+    var currentRow=0
+    var currentValues={}
     try {
         const file = req.file;
         const workbook = xlsx.readFile(file.path);
         const sheetNames = workbook.SheetNames;
         const timespanRecords=[]
         var lastDate=undefined
-        const results=[]
         // 遍历每个sheet
         for (const sheetName of sheetNames) {
             const worksheet = workbook.Sheets[sheetName];
@@ -364,7 +364,7 @@ app.post('/uploadImage', async (req, res) => {
             const data = xlsx.utils.sheet_to_json(worksheet);
 
             // 遍历每行数据
-            for (const row of data) {
+            for (const [rowIndex, row] of data.entries()) {
                 if(row['日期']===undefined) row['日期']=lastDate?lastDate:moment().format('YYYY-MM-DD');
                 lastDate=row['日期']
                 const currentTime = moment().format('HH:mm:ss');
@@ -375,17 +375,17 @@ app.post('/uploadImage', async (req, res) => {
                 }
                 timespanRecords.push(timespan)
 
-                console.log(row['日期'],`${moment(converted).format('YYYY-MM-DD')} ${currentTime}`,sheetName,converted)
+                //console.log(row['日期'],`${moment(converted).format('YYYY-MM-DD')} ${currentTime}`,sheetName,converted)
                 const dateStr=converted.toISOString().slice(0, 19).replace('T', ' ')
-                const docId = timespan; // 用日期转化成timestamp
-                const createTime = dateStr;
-                const title = row['文件名称'] || row['请示名称'] || row['工程名称'] || row['图纸名称'] || row['合同名称'];
-                const category = sheetName;
-                const project = row['所属项目'];
-                const agent = row['出图单位'] || row['发文单位'] || row['责任人'] || row['签发单位'];
-                const person = row['经办人'] || row['存档人'] || row['规划院移交人'];
-                const location = row['存放位置'] || row['盒号'];
-                const remark = row['中标金额'] || row['抵扣工程合同清单'] || row['版本号'] || row['抵押物'] || row['原件或复印件'];
+                // const docId = timespan; // 用日期转化成timestamp
+                // const createTime = dateStr;
+                // const title = row['文件名称'] || row['请示名称'] || row['工程名称'] || row['图纸名称'] || row['合同名称'];
+                // const category = sheetName;
+                // const project = row['所属项目'];
+                // const agent = row['出图单位'] || row['发文单位'] || row['责任人'] || row['签发单位'];
+                // const person = row['经办人'] || row['存档人'] || row['规划院移交人'];
+                // const location = row['存放位置'] || row['盒号'];
+                // const remark = row['中标金额'] || row['抵扣工程合同清单'] || row['版本号'] || row['抵押物'] || row['原件或复印件'];
                 const values = {
                   docId:timespan,
                   createTime : dateStr,
@@ -427,22 +427,44 @@ app.post('/uploadImage', async (req, res) => {
                     INSERT (${keys.join(", ")})
                     VALUES (${sourceKeys.join(", ")});`
                 // 执行SQL插入
+                currentSheet=sheetName
+                currentRow=rowIndex + 1
+                currentValues=values
                 try {
                   //console.log(query)
                     const result = await db.mssqlExcute(query)
-                    results.push(result.data)
+                    results.push(values)
+                    wss.clients.forEach(client => {
+                      if (client.readyState === WebSocket.OPEN) {
+                        client.send(JSON.stringify({ type:'excel', status: 'success', data: values }));
+                      }
+                    });
                 } catch (err) {
                     console.error('SQL Error: ', err);
+                    results.push({ sheet: sheetName, row: rowIndex + 2, error: err.message })
+                    wss.clients.forEach(client => {
+                      if (client.readyState === WebSocket.OPEN) {
+                        client.send(JSON.stringify({ type:'excel',status: 'error', data: { sheet: sheetName, row: rowIndex + 2, error: err.message } }));
+                      }
+                    });
+                    res.json({data:results,success:false})
                 }
             }
             
         }
 
-        res.json({data:results})
+        res.json({data:results,success:true})
         //res.send('File processed and data inserted into MSSQL');
     } catch (err) {
-        console.error(err);
-        res.status(500).send('Error processing file');
+        console.error("error",err);
+        results.push({ sheet: currentSheet, row: currentRow + 2, error: err.message })
+        wss.clients.forEach(client => {
+          if (client.readyState === WebSocket.OPEN) {
+            client.send(JSON.stringify({ type:'excel',status: 'failed', data: { sheet: currentSheet, row: currentRow + 2, error: err.message } }));
+          }
+        });
+        res.json({data:results,success:false})
+        //res.status(500).send('Error processing file');
     }
 });
 const convertExcelDate = (excelDate) => {

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDBload } from './DBLoaderContext';
 import {serverIp,serverPort} from '../../utils/config'
 
@@ -16,7 +16,25 @@ const headers={
   };
 const DatabaseLoader: React.FC<DatabaseLoaderProps> = (props) => {
     const {databaseType='mssql'} = props
-    const { setResult,setSearch,setProjects,setCategories,setLocations,setTags } = useDBload();
+    const { setResult,setSearch,setProjects,setCategories,setLocations,setTags,reload,setReload } = useDBload();
+    //const [reload, setReload] = useState<Number>();
+    useEffect(() => {
+      const ws = new WebSocket(`ws://${serverIp}:3002`);
+  
+      ws.onmessage = (event) => {
+          
+        const data = JSON.parse(event.data);
+          
+        if(data.type==="table-item-add"){
+          console.log(data)
+          setReload?.(new Date().getTime()/1000)
+        }
+      };
+  
+      return () => {
+        ws.close();
+      };
+    }, []);
       useEffect(() => {
         fetch("http://"+serverIp+":"+serverPort+"/getData",{
           headers:headers,
@@ -106,7 +124,7 @@ const DatabaseLoader: React.FC<DatabaseLoaderProps> = (props) => {
             setTags(data.data.recordset);
           }
         })
-    },[databaseType, setResult])
+    },[databaseType, setResult,reload])
     return <></>;
 };
 export default DatabaseLoader
