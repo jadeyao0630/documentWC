@@ -209,30 +209,32 @@ function App() {
               keys_values.push(`${key}=${val}`)
             }
           })
+          var query=""
           if(editItem.isNew){
-            console.log(`INSERT INTO categories (${keys.join(", ")}) VALUES (${values.join(",")});`)
+            query=`INSERT INTO categories (${keys.join(", ")}) VALUES (${values.join(",")});`
           }else{
             if(matched!==undefined){
-              console.log(`UPDATE categories SET ${keys_values.join(",")} WHERE id=${matched.id};`)
-              console.log(`UPDATE documents_list SET category = N'${editItem.name}' WHERE category=N'${matched.name}';`)
+              query=`UPDATE categories SET ${keys_values.join(",")} WHERE id=${matched.id};
+                    UPDATE documents_list SET category = N'${editItem.name}' WHERE category=N'${matched.name}';`
             }else{
-              console.log(`INSERT INTO categories (${keys.join(", ")}) VALUES (${values.join(",")});`)
+              query=`INSERT INTO categories (${keys.join(", ")}) VALUES (${values.join(",")});`
             }
-            //console.log('update and update doc list')
+           
             
           }
-          // if(index>categories.length-1){
-          //   categories?.push(editItem)
-          //   setCategories(categories)
-          // }else{
-          //   setCategories(categories?.map((p:Iobject,idx:number)=>
-          //     {
-          //       console.log(p,editItem)
-          //       return {...p,...editItem}
-          //     }
+          console.log(query)
+          if(index>categories.length-1){
+            categories?.push(editItem)
+            setCategories(categories)
+          }else{
+            setCategories(categories?.map((p:Iobject,idx:number)=>
+              {
+                console.log(p,editItem)
+                return {...p,...editItem}
+              }
           
-          //   ))
-          // }
+            ))
+          }
         }
       }else if(key==="locations"){
         const {locations,setLocations} =_data
