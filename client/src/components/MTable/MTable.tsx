@@ -72,7 +72,17 @@ const MTable: FC<ImTableProps> = (props) => {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
     setGoToPage((prevPage) => Math.max(prevPage - 1, 1));
   };
-
+  const handleFristPage = () => {
+    setCurrentPage(1);
+    setGoToPage(1);
+  };
+  const handleLastPage= () => {
+    if(search!==undefined){
+        setCurrentPage(Math.ceil(search.length / itemsPerPage));
+        
+        setGoToPage(Math.ceil(search.length / itemsPerPage));
+    }
+  };
   const handleNextPage = () => {
     if(search!==undefined){
         setCurrentPage((prevPage) => Math.min(prevPage + 1, Math.ceil(search.length / itemsPerPage)));
@@ -266,6 +276,25 @@ const MTable: FC<ImTableProps> = (props) => {
                 (imageURLs_thumb[item["docId"]]?'Loading...':'');
             }else if (type === "date") {
                 td_item = formatDateTime(item[key],tableColumns[key].format);
+            }else if (type === "combobox" || type === "multiCombobox") {
+                if(tableColumns[key].data!==undefined && tableColumns[key].data.length>0){
+                    //console.log(tableColumns[key].data)
+                    if((tableColumns[key].data as Iobject[]).find((d)=>{return d.label===item[key]})!==undefined){
+
+                    }else{
+                        
+                        if(tableColumns[key].backupKey!==undefined){
+
+                            const match=(tableColumns[key].data as Array<OptionType>).find((d)=>{return d.value.toString()===item[tableColumns[key].backupKey].toString()})
+                            //console.log("value is not match",tableColumns[key].data,item[tableColumns[key].backupKey])
+                            if(match!==undefined){
+                                td_item=match.label
+                            }
+                            
+                        }
+                    }
+                }
+                //td_item = tableColumns[key].data?tableColumns[key].data.find(()=>{})item[key];
             }
             
             return <td key={index} 
@@ -400,7 +429,7 @@ const MTable: FC<ImTableProps> = (props) => {
         } catch (error) {
             console.error('Dialog was dismissed', error);
         }
-        
+        setCurrentItem(undefined)
         
     }
     const onSubmited = () => {
@@ -502,14 +531,28 @@ const MTable: FC<ImTableProps> = (props) => {
 
         console.log(currentItem,updatedItem)
     }
-    const getValuesFromLabels = (labels:string,columnData:ColumnData)=>{
-        return labels.split(",").map((ik:String)=>{
+    const getValuesFromLabels = (item:Iobject,key:string,columnData:ColumnData)=>{
+        const labels=item[key]
+        var result=labels.split(",").map((ik:String)=>{
             const matched = columnData.data.find(d=>d.label===ik.trim());
             if(matched!==undefined) return matched.value
         }).filter((itm:String) => itm !== undefined)
+        if(result.length===0){
+            if(tableColumns[key].backupKey!==undefined){
+                const backupKey=tableColumns[key].backupKey
+                
+                result = item[backupKey].toString().split(",").map((ik:String)=>{
+                    const matched = columnData.data.find(d=>d.value.toString()===ik.trim().toString());
+                    console.log("getValuesFromLabels",matched)
+                    if(matched!==undefined) return matched.value
+                }).filter((itm:String) => itm !== undefined)
+            }
+        }
+        return result
     }
-    const getValues = (values:string,columnData:ColumnData) => {
-        return values?(values.constructor===String?getValuesFromLabels(values,columnData):[values]):(columnData.value?columnData.value:[])
+    const getValues = (item:Iobject,key:string,columnData:ColumnData) => {
+        const values=item[key]
+        return values?(values.constructor===String?getValuesFromLabels(item,key,columnData):[values]):(columnData.value?columnData.value:[])
     }
     const getItem = (columnData:ColumnData,key:string,item:Iobject) => {
         const width=300
@@ -518,9 +561,9 @@ const MTable: FC<ImTableProps> = (props) => {
         }else if(columnData.type==="textarea"){
             return <textarea className="gr-textarea"  style={{width:width,margin:"5px 0px 5px 10px"}} name={key} value={item[key]} onChange={(e:React.ChangeEvent<HTMLTextAreaElement>)=>{onTextChanged(e,key,item)}}/>
         }else if (columnData.type==="combobox" || columnData.type==='multiCombobox'){
-            console.log(item[key],item[key].constructor,item[key].constructor===String?getValuesFromLabels(item[key],columnData):item[key])
+            console.log(item[key],item[key].constructor,item[key].constructor===String?getValuesFromLabels(item,key,columnData):item[key])
             return <Dropdown 
-            defaultValues={getValues(item[key],columnData)}
+            defaultValues={getValues(item,key,columnData)}
             style={{width:width,display:"inline-block",margin:"5px 0px 5px 10px",textAlign:'left'}}
             options={columnData.data?columnData.data:[]}
             isMulti={columnData.type==='multiCombobox'}
@@ -534,8 +577,12 @@ const MTable: FC<ImTableProps> = (props) => {
     }
     const onSelectValueChanged=(selectedOptions: SingleValue<OptionType> | MultiValue<OptionType>,key:string,item:Iobject) => {
         console.log(selectedOptions)
-        const updatedItem = { ...item, [key]: Array.isArray(selectedOptions)?selectedOptions.map(option => option.label).join(', '):
+        var updatedItem = { ...item, [key]: Array.isArray(selectedOptions)?selectedOptions.map(option => option.label).join(', '):
             (selectedOptions?(selectedOptions as OptionType).label:"" )};
+        if(tableColumns[key].backupKey!==undefined){
+            updatedItem = { ...updatedItem, [tableColumns[key].backupKey]: Array.isArray(selectedOptions)?selectedOptions.map(option => option.value).join(', '):
+            (selectedOptions?(selectedOptions as OptionType).value:"" )};
+        }
         console.log(updatedItem);
         setCurrentItem(updatedItem);
     }
@@ -628,6 +675,9 @@ const MTable: FC<ImTableProps> = (props) => {
                 </div>
             )}
             <div className="pagination">
+                <Button onClick={handleFristPage} style={{width:30}} disabled={currentPage === 1}>
+                <Icon icon="angle-double-left"/>
+                </Button>
                 <Button onClick={handlePreviousPage} disabled={currentPage === 1}>
                 <Icon icon="angle-left"/>
                 </Button>
@@ -637,6 +687,9 @@ const MTable: FC<ImTableProps> = (props) => {
                 </span>
                 <Button onClick={handleNextPage} disabled={currentPage === Math.ceil(search?.length / itemsPerPage)}>
                 <Icon icon="angle-right"/>
+                </Button>
+                <Button onClick={handleLastPage} style={{width:30}} disabled={currentPage === Math.ceil(search?.length / itemsPerPage)}>
+                <Icon icon="angle-double-right"/>
                 </Button>
                 <div style={{display:"inline-block",marginLeft:"10px"}}>
                     <label>

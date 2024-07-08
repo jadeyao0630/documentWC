@@ -150,7 +150,7 @@ function App() {
   const handleAddItem = (key:string) => {
     const lastItem=getMaxIdItem(optionData[key]);
     if(lastItem!==undefined){
-      optionData[key].push({ ...lastItem, name: "",id: lastItem.id+1})
+      optionData[key].push({ ...lastItem, name: "",id: lastItem.id+1,isNew:true})
       console.log("newOptionData",optionData[key])
       setOptionData((opt)=>({...opt,[key]:optionData[key]}));
       setTimeout(() => {
@@ -192,17 +192,47 @@ function App() {
       }else if(key==="categories"){
         const {categories,setCategories} =_data
         if(categories!==undefined){
-          console.log("saveChanges",optionData[key][index],(index>categories.length-1),optionData[key],categories)
-          if(index>categories.length-1){
-            categories?.push(optionData[key][index])
-            setCategories(categories)
-          }else{
+          const editItem=optionData[key][index]
+          console.log("saveChanges",editItem,(index>categories.length-1),optionData[key],categories)
+          const matched = categories.find(d=>{
+            return d.id===editItem.id
+          })
+          var keys:string[]=[]
+          var values:string[]=[]
+          var keys_values:string[]=[]
+          Object.keys(editItem).forEach(key=>{
+            if(key!=="id" && key!=="isNew"){
 
-            setCategories(categories?.map((p:Iobject,idx:number)=>
-              {return {...p,...optionData[key][idx]}}
-          
-            ))
+              keys.push(key)
+              const val=key==="id" || key==="isDisabled"?editItem[key]:`N'${editItem[key]}'`;
+              values.push(val)
+              keys_values.push(`${key}=${val}`)
+            }
+          })
+          if(editItem.isNew){
+            console.log(`INSERT INTO categories (${keys.join(", ")}) VALUES (${values.join(",")});`)
+          }else{
+            if(matched!==undefined){
+              console.log(`UPDATE categories SET ${keys_values.join(",")} WHERE id=${matched.id};`)
+              console.log(`UPDATE documents_list SET category = N'${editItem.name}' WHERE category=N'${matched.name}';`)
+            }else{
+              console.log(`INSERT INTO categories (${keys.join(", ")}) VALUES (${values.join(",")});`)
+            }
+            //console.log('update and update doc list')
+            
           }
+          // if(index>categories.length-1){
+          //   categories?.push(editItem)
+          //   setCategories(categories)
+          // }else{
+          //   setCategories(categories?.map((p:Iobject,idx:number)=>
+          //     {
+          //       console.log(p,editItem)
+          //       return {...p,...editItem}
+          //     }
+          
+          //   ))
+          // }
         }
       }else if(key==="locations"){
         const {locations,setLocations} =_data

@@ -59,16 +59,40 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
         setTags([newAdded])
       }
     }
+    const convertSelected = (selected:SingleValue<OptionType> | MultiValue<OptionType>) => {
+      return selected?
+              (
+                Array.isArray(selected)?
+                  selected
+                  :
+                  [selected]
+              )
+                :
+              []
+    }
+    const isIncludes = (source:Array<OptionType>,target:string,valueId:string) =>{
+      return source.length>0?
+              source.filter(s=>(target.length>0 && s.label.toLowerCase().includes(target.toLowerCase())) || (Number(valueId)>-1 && s.value.toString().toLowerCase().includes(valueId.toString().toLowerCase()))).length>0
+              :
+              true
+    }
     const onSearchClicked =()=>{
       console.log(selectedProj,typeof(selectedProj),selectedProj?.constructor)
-      if(selectedProj!==null){
-        if(Array.isArray(selectedProj)){
-          //const 
-        }
+      const searchList:Iobject={project:convertSelected(selectedProj),category:convertSelected(selectedCate),location:convertSelected(selectedLoca)}
+      var searchResult:Iobject[]|undefined=[]
+      if(searchList!==null){
+        console.log(searchList)
+        searchResult=result?.filter(res=>{
+          return isIncludes(searchList.project,res.project,res.projectId) && 
+                  isIncludes(searchList.category,res.category,res.categoryId) && 
+                  isIncludes(searchList.location,res.location,res.locationId)
+        })
       }
+      console.log(searchResult)
+      //setSearch(searchResult!==undefined?searchResult:(result?result:[]));
       var _selected:string[]=[];
       if(selected===null || (Array.isArray(selected) && selected.length===0) || (isOptionType(selected) && (selected as OptionType).label.length===0)) {
-        setSearch(result?result:[])
+        setSearch(searchResult?searchResult:[])
         return;
       }
       if(Array.isArray(selected)){
@@ -78,10 +102,9 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
       }else{
         _selected=[(selected as OptionType).label.toLowerCase()]
       }
-      const searchConditions={}
       
       
-      const filteredResult = result?.filter((res: Iobject) => {
+      const filteredResult = searchResult?.filter((res: Iobject) => {
         var allTags:string[]=[]
         Object.keys(res).forEach(key => {
           if(tableColumns[key] && tableColumns[key].isFilterable){
@@ -125,7 +148,7 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
     //console.log("tags",tags,_tags)
     return <div ref={self} style={{display:"flex",width:"100%",position:"fixed",top:"49px",background:"white",zIndex:"999"}}>
                 <Dropdown 
-                  style={{margin:"5px 0px 5px 5px",textAlign:'left',width:"400px"}}
+                  style={{margin:"5px 0px 5px 5px",textAlign:'left',width:"30%"}}
                   options={projects?projects.map((data) => ({
                     label: data.name,
                     value: data.id.toString()
@@ -137,7 +160,7 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
                   placeholder="请选择项目"
                 ></Dropdown>
                 <Dropdown 
-                  style={{margin:"5px 0px 5px 5px",textAlign:'left',width:"400px"}}
+                  style={{margin:"5px 0px 5px 5px",textAlign:'left',width:"30%"}}
                   options={categories?categories.map((data) => ({
                     label: data.name,
                     value: data.id.toString()
@@ -149,7 +172,7 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
                   placeholder="请选择分类"
                 ></Dropdown>
                 <Dropdown 
-                  style={{margin:"5px 0px 5px 5px",textAlign:'left',width:"400px"}}
+                  style={{margin:"5px 0px 5px 5px",textAlign:'left',width:"30%"}}
                   options={locations?locations.map((data) => ({
                     label: data.name,
                     value: data.id.toString()
@@ -160,7 +183,7 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
                   onChange={_locaChange}
                   placeholder="请选择位置"
                 ></Dropdown>
-            <div style={{display:"grid",gridTemplateColumns:"1fr auto",width:"100%"}}>
+            <div style={{display:"grid",gridTemplateColumns:"1fr auto",width:"34%"}}>
               <Dropdown 
                 style={{margin:"5px 0px 5px 5px",textAlign:'left'}}
                 options={_tags}

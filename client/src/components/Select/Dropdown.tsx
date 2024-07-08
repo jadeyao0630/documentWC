@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Select, { ActionMeta, components, InputProps, MultiValue, OptionProps, SingleValue, StylesConfig, ValueContainerProps } from 'react-select';
 import { DropdownIndicator } from 'react-select/dist/declarations/src/components/indicators';
 import { Iobject } from '../MTable/MTable';
@@ -138,6 +138,9 @@ const customStyles: StylesConfig<OptionType> = {
   };
   const [inputValue, setInputValue] = useState('');
   const [selectOptions, setSelectOptions] = useState<OptionType[]>(options);
+
+  
+
   var selected:OptionType[]|undefined=[]
   if(defaultValues && defaultValues.length>0){
     selected=options.filter(opt=>defaultValues.includes(opt.value))
@@ -220,6 +223,7 @@ const customStyles: StylesConfig<OptionType> = {
       noOptionsMessage={()=>"没有更多"}
       isClearable={isClearable}
     />
+    
   );
 };
 

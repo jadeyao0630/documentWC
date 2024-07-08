@@ -2,7 +2,7 @@ import { Iobject } from "../components/MTable/MTable"
 
 const local ="192.168.10.122"
 const glory ="192.168.10.213"
-export const serverIp=glory
+export const serverIp=local
 export const serverPort="4555"
 
 export interface ColumnData {
@@ -15,6 +15,7 @@ export interface ColumnData {
     value:Array<any>;
     isHide:boolean;
     style?:React.CSSProperties;
+    backupKey?:string;
   }
 export const tableColumns:Iobject={
     docId:{
@@ -37,7 +38,8 @@ export const tableColumns:Iobject={
         type:'combobox',
         data:[],
         value:["0"],
-        isFilterable:true
+        isFilterable:true,
+        backupKey:'projectId'
     },
     category:{
         label:'分类',
@@ -47,7 +49,8 @@ export const tableColumns:Iobject={
         type:'combobox',
         data:[],
         value:["0"],
-        isFilterable:true
+        isFilterable:true,
+        backupKey:'categoryId'
     },
     title:{
         label:'名称',
@@ -79,7 +82,8 @@ export const tableColumns:Iobject={
         type:'combobox',
         data:[],
         value:["0"],
-        isFilterable:true
+        isFilterable:true,
+        backupKey:'locationId'
     },
     modifiedTime:{
         label:'更新日期',
