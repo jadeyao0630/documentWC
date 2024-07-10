@@ -49,6 +49,20 @@ table{
         z-index: 99;
     }
 }
+.fixed-pos{
+  position: sticky;
+  background-color: white;
+  z-index: 98;
+  border-right: 1px solid #ddd;
+}
+.fixed-1st{
+  left:0;
+}
+.fixed-last{
+  right:0;
+  border-left: 1px solid #ddd;
+  border-right: none;
+}
 .popupImg {
     position: absolute;
     left:0;
@@ -135,6 +149,7 @@ table{
     background-color: white;
     box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.2);
     width:100%;
+    z-index:100;
   }
   
   .pagination button {

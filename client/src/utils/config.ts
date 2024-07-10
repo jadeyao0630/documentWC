@@ -9,6 +9,7 @@ export interface ColumnData {
     label: string;
     isEditble?: boolean; // 假设每行数据中有一个fileName字段
     isFilterable?: boolean;
+    isFixed?:boolean;
     width:string|number;
     type:string;
     data:Array<any>;
@@ -22,7 +23,8 @@ export const tableColumns:Iobject={
         label:'编号',
         width:80,
         type:'text',
-        isFilterable:true
+        isFilterable:true,
+        isFixed:true
     },
     createTime:{
         label:'创建日期',

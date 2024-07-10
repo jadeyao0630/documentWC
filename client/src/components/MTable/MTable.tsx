@@ -234,6 +234,7 @@ const MTable: FC<ImTableProps> = (props) => {
             
             return <td key={index} 
                         data-index={index} 
+                        className={tableColumns[key].isFixed?"fixed-pos fixed-1st":""}
                         //data-tooltip-id={"table-tooltips"} 
                         //data-tooltip-content={td_item} 
                         style={style} 
@@ -279,7 +280,7 @@ const MTable: FC<ImTableProps> = (props) => {
             if(columnData.style) style={...style, ...columnData.style }
             var th_item=columnData.label;
 
-            return <th key={index} data-index={index} style={style}>{th_item}</th>
+            return <th className={tableColumns[key].isFixed?"fixed-pos fixed-1st":""} key={index} data-index={index} style={style}>{th_item}</th>
         }return null
     }
     const headers = Object.keys(tableColumns)
@@ -538,7 +539,7 @@ const MTable: FC<ImTableProps> = (props) => {
                         {headers.map((item, index) => (
                             setTh(index,item)
                         ))}
-                        <th key="action_btns" style={{ width: 50,textAlign:"left"}}>功能</th>
+                        <th key="action_btns" style={{ width: 50,textAlign:"left"}} className="fixed-pos fixed-last">功能</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -547,7 +548,7 @@ const MTable: FC<ImTableProps> = (props) => {
                             {headers.map((key, subIndex) => (
                                 setTd(subIndex,key,item)
                             ))}
-                            <td key={"action_btns_"+index} 
+                            <td key={"action_btns_"+index } className="fixed-pos fixed-last"
                                 style={{padding:0}}>
                                 <Button 
                                 style={{margin:5}}
