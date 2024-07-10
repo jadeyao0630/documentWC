@@ -48,7 +48,13 @@ function App() {
   const showMessage = (mesg:string | null) => {
     setMessage(mesg);
   };
-  
+  const onFilterChanged = (e:React.ChangeEvent<HTMLInputElement>) =>{
+    if(optionIndex) {
+      //e.target.value.length>0
+      console.log(optionData[optionIndex])
+      setOptionData({...optionData,[optionIndex]:optionData[optionIndex].map((d:Iobject)=>({...d,isHide:e.target.value.length>0 && !d.name.includes(e.target.value)}))})
+    }
+  }
   const MenuItemClicked = (e:React.MouseEvent<HTMLAnchorElement>,data:DBLoaderContextType)=>{
     e.preventDefault(); 
     //setShowHeaderMenu(false)
@@ -126,14 +132,17 @@ function App() {
                   if(optionIndex!==undefined) handleAddItem(optionIndex)
                 }}><Icon icon={"plus"}></Icon></Button>
               </div>
-          {optionData && optionIndex && optionData[optionIndex] && <ul ref={scrollableContainerRef} style={{overflowY:"auto",maxHeight:"200px",marginTop:"20px"}}>
+          {optionData && optionIndex && optionData[optionIndex] && 
+          <>
+          <Input type='search' style={{marginTop:"10px",width:"calc( 100% - 5px)"}} onChange={onFilterChanged}></Input>
+          <ul ref={scrollableContainerRef} style={{overflowY:"auto",maxHeight:"200px",marginTop:"10px"}}>
             {optionData[optionIndex].map((opt:Iobject,idx:number)=>{
               console.log(opt)
-              return <li key={idx} style={
+              return !opt.isHide && <li key={idx} style={
                 {...{display:"grid",gridTemplateColumns:"1fr auto auto auto",marginTop:"5px",alignItems:"center",textAlign:"left",border:"1px solid #ddd",paddingLeft:"10px",borderRadius:"5px",marginLeft:"-28px"},
                 ...(optionOriginalData[optionIndex].length-1===idx)?{marginBottom:"5px"}:{}}
                 }>
-                <Input type="text" style={{border:"none",boxShadow:"none"}} value={opt.name} onChange={(e)=>{
+                <Input type="text" style={{...{border:"none",boxShadow:"none"},...opt.isDisabled?{color:"grey"}:{}}} value={opt.name} onChange={(e)=>{
                   console.log((e.currentTarget as HTMLInputElement).value)
                   handleInputChange(optionIndex,idx,(e.currentTarget as HTMLInputElement).value)
                   //setOptionData({...optionData,[optionIndex]:{...opt,name:(e.currentTarget as HTMLInputElement).value}})
@@ -141,11 +150,11 @@ function App() {
                   }}></Input>
                 
                 <Button data-tooltip-id='main-tooltips' data-tooltip-content={"保存修改"} style={optionOriginalData[optionIndex][idx] && optionOriginalData[optionIndex][idx].name===opt.name?{display:"none"}:{color:"green",border:"none",boxShadow:"none"}} 
-                  onClick={(e)=>saveChanges(optionIndex,idx)}><Icon icon={opt.isDisabled?"sync":"check"}></Icon></Button>
-                <Button data-tooltip-id='main-tooltips' data-tooltip-content={"禁用选项"} btnType='red' style={{border:"none",boxShadow:"none"}}><Icon icon={"times"}></Icon></Button>
+                  onClick={(e)=>saveChanges(optionIndex,idx)}><Icon icon={"check"}></Icon></Button>
+                <Button data-tooltip-id='main-tooltips' data-tooltip-content={opt.isDisabled?"恢复选项":"禁用选项"} btnType={opt.isDisabled?"green-r":"red"} onClick={(e)=>saveChanges(optionIndex,idx,true)} style={{border:"none",boxShadow:"none"}}><Icon icon={opt.isDisabled?"sync":"times"}></Icon></Button>
               </li>
             })}
-          </ul>}
+          </ul></>}
         </div>
         <Tooltip id='main-tooltips' style={{zIndex:1001}}/>
       </div>
@@ -180,7 +189,7 @@ function App() {
     console.log("newOptionData",newOptionData)
     setOptionData((opt)=>({...opt,[key]:newOptionData}));
   };
-  const processSubmitSave = (key:string,index:number,data:DBLoaderContextType) =>{
+  const processSubmitSave = (key:string,index:number,data:DBLoaderContextType,setStatus:boolean) =>{
     const {projects,categories,locations,setReload} =data
     var sourceData:Iobject[]|undefined=[]
     if(key==="categories"){
@@ -194,35 +203,51 @@ function App() {
     }
     if(sourceData!==undefined){
       const editItem=optionData[key][index]
-      console.log("saveChanges",editItem,(index>sourceData.length-1),optionData[key],sourceData)
+     
       const matched = sourceData.find(d=>{
         return d.id===editItem.id
       })
-      var keys:string[]=[]
-      var values:string[]=[]
-      var keys_values:string[]=[]
-      Object.keys(editItem).forEach(key=>{
-        if(key!=="id" && key!=="isNew"){
-
-          keys.push(key)
-          const val=key==="isDisabled"?editItem[key]?"1":"0":`N'${editItem[key]}'`;
-          values.push(val)
-          keys_values.push(`${key}=${val}`)
-        }
-      })
+      console.log("saveChanges",editItem,matched)
       var query=""
-      if(editItem.isNew){
-        query=`INSERT INTO ${key} (${keys.join(", ")}) VALUES (${values.join(",")});`
-      }else{
-        if(matched!==undefined){
-          query=`UPDATE ${key} SET ${keys_values.join(",")} WHERE id=${matched.id};
-                UPDATE documents_list SET category = N'${editItem.name}' WHERE category=N'${matched.name}';`
-        }else{
+      if(!setStatus){
+        var keys:string[]=[]
+        var values:string[]=[]
+        var keys_values:string[]=[]
+        Object.keys(editItem).forEach(key=>{
+          if(key!=="id" && key!=="isNew"){
+  
+            keys.push(key)
+            const val=key==="isDisabled"?editItem[key]?"1":"0":`N'${editItem[key]}'`;
+            values.push(val)
+            keys_values.push(`${key}=${val}`)
+          }
+        })
+        
+        if(editItem.isNew){
           query=`INSERT INTO ${key} (${keys.join(", ")}) VALUES (${values.join(",")});`
+        }else{
+          if(matched!==undefined){
+            query=`UPDATE ${key} SET ${keys_values.join(",")} WHERE id=${matched.id};
+                  UPDATE documents_list SET category = N'${editItem.name}' WHERE category=N'${matched.name}';`
+          }else{
+            query=`INSERT INTO ${key} (${keys.join(", ")}) VALUES (${values.join(",")});`
+          }
+          
+          
         }
-        
-        
+      }else{
+
+        query=`UPDATE ${key} SET isDisabled = ${editItem?.isDisabled?0:1} WHERE id=${matched?.id}`;
+        const newOptionData = optionData[key].map(((opt:Iobject,idx:number)=>(
+          idx === index 
+            ? { ...opt, isDisabled: !editItem?.isDisabled }
+            : opt
+              
+        )))
+        console.log("newOptionData",newOptionData,matched,editItem)
+        setOptionData((opt)=>({...opt,[key]:newOptionData}));
       }
+      
       fetch("http://"+serverIp+":"+serverPort+"/saveData",{
         headers:{
           'Content-Type': 'application/json'
@@ -240,103 +265,19 @@ function App() {
     }
     
   }
-  const saveChanges = (key:string,index: number) => {
+  const saveChanges = (key:string,index: number,setStatus:boolean=false) => {
     if(_data!==undefined && optionData!==undefined){
-      // if(key==="projects"){
-      //   const {projects,setProjects} =_data
-      //   if(projects!==undefined){
-      //     if(index>projects.length-1){
-      //       projects?.push(optionData[key][index])
-      //       setProjects(projects)
-      //     }else{
+      processSubmitSave(key,index,_data,setStatus)
+      if(setStatus){
 
-      //       setProjects(projects?.map((p:Iobject,idx:number)=>
-      //         {return idx === index? optionData[key][index]:p}
-      //       ))
-      //     }
-
-      //   }
-      // }else if(key==="categories"){
-      //   const {categories,setCategories,setReload} =_data
-      //   if(categories!==undefined){
-      //     const editItem=optionData[key][index]
-      //     console.log("saveChanges",editItem,(index>categories.length-1),optionData[key],categories)
-      //     const matched = categories.find(d=>{
-      //       return d.id===editItem.id
-      //     })
-      //     var keys:string[]=[]
-      //     var values:string[]=[]
-      //     var keys_values:string[]=[]
-      //     Object.keys(editItem).forEach(key=>{
-      //       if(key!=="id" && key!=="isNew"){
-
-      //         keys.push(key)
-      //         const val=key==="isDisabled"?editItem[key]?"1":"0":`N'${editItem[key]}'`;
-      //         values.push(val)
-      //         keys_values.push(`${key}=${val}`)
-      //       }
-      //     })
-      //     var query=""
-      //     if(editItem.isNew){
-      //       query=`INSERT INTO categories (${keys.join(", ")}) VALUES (${values.join(",")});`
-      //     }else{
-      //       if(matched!==undefined){
-      //         query=`UPDATE categories SET ${keys_values.join(",")} WHERE id=${matched.id};
-      //               UPDATE documents_list SET category = N'${editItem.name}' WHERE category=N'${matched.name}';`
-      //       }else{
-      //         query=`INSERT INTO categories (${keys.join(", ")}) VALUES (${values.join(",")});`
-      //       }
-           
-            
-      //     }
-      //     fetch("http://"+serverIp+":"+serverPort+"/saveData",{
-      //       headers:{
-      //         'Content-Type': 'application/json'
-      //       },
-      //       method: 'POST',
-      //       body: JSON.stringify({ type: 'mssql',query:query})
-      //     })
-      //     .then(response => response.json())
-      //     .then(data => {
-      //         console.log("saveData",data,query)
-      //         setReload?.(new Date().getTime()/1000)
-      //         showMessage(data.data.rowsAffected.length>0?"执行完成":"执行失败")
-
-      //     })
-      //     // if(index>categories.length-1){
-      //     //   categories?.push(editItem)
-      //     //   setCategories(categories)
-      //     // }else{
-      //     //   setCategories(categories?.map((p:Iobject,idx:number)=>
-      //     //     {
-      //     //       console.log(p,editItem)
-      //     //       return {...p,...editItem}
-      //     //     }
-          
-      //     //   ))
-      //     // }
-      //   }
-      // }else if(key==="locations"){
-      //   const {locations,setLocations} =_data
-      //   if(locations!==undefined){
-      //     if(index>locations.length-1){
-      //       locations?.push(optionData[key][index])
-      //       setLocations(locations)
-      //     }else{
-
-      //       setLocations(locations?.map((p:Iobject,idx:number)=>
-      //         {return idx === index? optionData[key][index]:p}
-          
-      //       ))
-      //     }
-      //   }
-      // }
-      processSubmitSave(key,index,_data)
-      setOptionOriginalData((opt)=>({...opt,[key]:opt[key].map((op:Iobject,id:number)=>(
-        id === index 
-          ? optionData[key][index]
-          : op
-      ))}));
+      }else{
+        setOptionOriginalData((opt)=>({...opt,[key]:opt[key].map((op:Iobject,id:number)=>(
+          id === index 
+            ? optionData[key][index]
+            : op
+        ))}));
+      }
+      
       
     }
   }
@@ -353,10 +294,10 @@ function App() {
       <Route path="/" element={<>
             <Header title="档案归档" isMenuOpen={showHeaderMenu}>
               <HeaderMenuItem items={[
-                {icon:"user-plus",label:"注册账户",color:"#1362B7",id:"register",onClicked:MenuItemClicked},
+                //{icon:"user-plus",label:"注册账户",color:"#1362B7",id:"register",onClicked:MenuItemClicked},
                 {icon:"upload",label:"导入数据",color:"#348a09",id:"import",onClicked:MenuItemClicked},
                 {icon:"list-alt",label:"编辑选项",color:"#d63384",id:"options",onClicked:MenuItemClicked},
-                {icon:"sign-out",label:"退出",color:"red",id:"exit",onClicked:MenuItemClicked}
+                //{icon:"sign-out",label:"退出",color:"red",id:"exit",onClicked:MenuItemClicked}
               ]}></HeaderMenuItem>
               
             </Header>
@@ -364,6 +305,7 @@ function App() {
             <MTable style={{marginTop:tableMarginTop}}/>
           </>} />
         <Route path="/search" element={<><SearchPage /></>} />
+        <Route path="/regist" element={<div style={{display:"inline-grid"}}><UserRegister /></div>} />
         
             
       </Routes>

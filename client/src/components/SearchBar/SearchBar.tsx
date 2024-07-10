@@ -157,7 +157,7 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
     return <div ref={self} style={{display:"flex",width:"100%",position:"fixed",top:"49px",background:"white",zIndex:"999"}}>
                 <Dropdown 
                   style={{margin:"5px 0px 5px 5px",textAlign:'left',width:"30%"}}
-                  options={projects?projects.map((data) => ({
+                  options={projects?projects.filter((data)=>Number(data.isDisabled)===0).map((data) => ({
                     label: data.name,
                     value: data.id.toString()
                   })):[]}
@@ -169,7 +169,7 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
                 ></Dropdown>
                 <Dropdown 
                   style={{margin:"5px 0px 5px 5px",textAlign:'left',width:"30%"}}
-                  options={categories?categories.map((data) => ({
+                  options={categories?categories.filter((data)=>Number(data.isDisabled)===0).map((data) => ({
                     label: data.name,
                     value: data.id.toString()
                   })):[]}
@@ -181,7 +181,7 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
                 ></Dropdown>
                 <Dropdown 
                   style={{margin:"5px 0px 5px 5px",textAlign:'left',width:"30%"}}
-                  options={locations?locations.map((data) => ({
+                  options={locations?locations.filter((data)=>Number(data.isDisabled)===0).map((data) => ({
                     label: data.name,
                     value: data.id.toString()
                   })):[]}

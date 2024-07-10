@@ -62,7 +62,6 @@ const DatabaseLoader: React.FC<DatabaseLoaderProps> = (props) => {
             select 
             *
             from projects
-            where isDisabled = 0
             `})
         })
         .then(response => response.json())
@@ -79,7 +78,6 @@ const DatabaseLoader: React.FC<DatabaseLoaderProps> = (props) => {
             select 
             *
             from categories
-            where isDisabled = 0
             `})
         })
         .then(response => response.json())
@@ -96,7 +94,6 @@ const DatabaseLoader: React.FC<DatabaseLoaderProps> = (props) => {
             select 
             *
             from locations
-            where isDisabled = 0
             `})
         })
         .then(response => response.json())
@@ -113,7 +110,6 @@ const DatabaseLoader: React.FC<DatabaseLoaderProps> = (props) => {
             select 
             *
             from tags
-            where isDisabled = 0
             ORDER BY freq DESC
             `})
         })

@@ -1,14 +1,31 @@
 import React, { useState } from 'react';
 import Input from '../Input/input';
 import Button from '../Button/button';
+import { serverIp, serverPort } from '../../utils/config';
+import CryptoJS from 'crypto-js';
 
+const keyStr = 'it@glory.com'
+const ivStr = 'it@glory.com'
 interface FormState {
   username: string;
   userFullname: string;
   password: string;
   confirmPassword: string;
 }
-
+function encrypt(data: string, keyS?: string, ivS?: string): string {
+  const key = CryptoJS.enc.Utf8.parse(keyS || keyStr);
+  const iv = CryptoJS.enc.Utf8.parse(ivS || ivStr);
+  const src = CryptoJS.enc.Utf8.parse(data);
+  
+  const cipher = CryptoJS.AES.encrypt(src, key, {
+    iv: iv, // Initialization vector
+    mode: CryptoJS.mode.CBC, // Encryption mode
+    padding: CryptoJS.pad.Pkcs7, // Padding
+  });
+  
+  const encrypted = cipher.toString();
+  return encrypted;
+}
 const UserRegister: React.FC = () => {
   const [form, setForm] = useState<FormState>({
     username: '',
@@ -35,7 +52,7 @@ const UserRegister: React.FC = () => {
   const validate = () => {
     const newErrors: Partial<FormState> = {};
     if (!form.username) newErrors.username = 'Username is required';
-    if (!form.userFullname) newErrors.userFullname = 'Full name is required';
+    //if (!form.userFullname) newErrors.userFullname = 'Full name is required';
     if (!form.password) newErrors.password = 'Password is required';
     if (form.password !== form.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
     return newErrors;
@@ -49,7 +66,21 @@ const UserRegister: React.FC = () => {
     } else {
       setErrors({});
       setSubmitted(true);
-      console.log('Form submitted successfully', form);
+      const query=`INSERT INTO user_list (name,userName,pass,isDisabled) VALUES (N'${form.username}',N'${form.userFullname}',N'${encrypt(form.password)}',0);`
+      fetch("http://"+serverIp+":"+serverPort+"/saveData",{
+        headers:{
+          'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify({ type: 'mssql',query:query})
+      })
+      .then(response => response.json())
+      .then(data => {
+          console.log("saveData",data,query)
+          
+          console.log('Form submitted successfully', form);
+
+      })
       
       // Handle form submission, e.g., send data to server
     }
@@ -60,7 +91,7 @@ const UserRegister: React.FC = () => {
       {submitted && <div className="success-message">注册成功！</div>}
       <form className="form-user-register" onSubmit={handleSubmit}>
         <div className='form-item-container'>
-          <label>用户名</label>
+          <label><span style={{color:"red"}}>*</span>用户名</label>
           <Input
             type="text"
             name="username"
@@ -70,7 +101,7 @@ const UserRegister: React.FC = () => {
           />
         </div>
         <div className='form-item-container'>
-          <label>全名</label>
+          <label><span></span>全名</label>
           <Input
             type="text"
             name="userFullname"
@@ -80,7 +111,7 @@ const UserRegister: React.FC = () => {
           />
         </div>
         <div className='form-item-container'>
-          <label>密码</label>
+          <label><span style={{color:"red"}}>*</span>密码</label>
           <Input
             type="password"
             name="password"
@@ -91,7 +122,7 @@ const UserRegister: React.FC = () => {
           {errors.password && <span className="error">{errors.password}</span>}
         </div>
         <div className='form-item-container'>
-          <label>确认密码</label>
+          <label><span style={{color:"red"}}>*</span>确认密码</label>
           <Input
             type="password"
             name="confirmPassword"

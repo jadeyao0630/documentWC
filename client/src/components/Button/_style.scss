@@ -48,6 +48,9 @@
 .btn-green {
     @include button-style($green, $gray-400, $white, lighten($green,10%), lighten($green,10%))
 }
+.btn-green-r {
+    @include button-style($white, $gray-400, $green, $white)
+}
 .btn-blue {
     @include button-style($gloryBlue, $gray-400, $white, lighten($gloryBlue,10%), lighten($gloryBlue,10%))
 }

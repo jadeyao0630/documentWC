@@ -3,7 +3,7 @@ import {ButtonHTMLAttributes,AnchorHTMLAttributes,FC,RefObject, ClassAttributes,
 import classNames from "classnames";
 export type ButtonSize ='lrg' | 'sml' | 'default'
 
-export type ButtonTypes = "primary" | "default" | 'danger' | 'link' | "green" | 'blue' | 'red'
+export type ButtonTypes = "primary" | "default" | 'danger' | 'link' | "green" | "green-r" | 'blue' | 'red'
 
 export interface IBaseButtonProps {
     /** 类名 */

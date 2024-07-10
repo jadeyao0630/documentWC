@@ -149,23 +149,23 @@ const MTable: FC<ImTableProps> = (props) => {
       };
       useEffect(() => {
 
-        tableColumns.category.data=categories?.map((data) => ({
+        tableColumns.category.data=categories?.filter((data)=>Number(data.isDisabled)===0).map((data) => ({
             label: data.name,
             value: data.id.toString()
           }))
           //tableColumns.project.value=["0"]
-          tableColumns.project.data=projects?.map((data) => ({
+          tableColumns.project.data=projects?.filter((data)=>Number(data.isDisabled)===0).map((data) => ({
             label: data.name,
             value: data.id.toString()
           }))
           //tableColumns.project.value=["0"]
-          tableColumns.location.data=locations?.map((data) => ({
+          tableColumns.location.data=locations?.filter((data)=>Number(data.isDisabled)===0).map((data) => ({
             label: data.name,
             value: data.id.toString()
           }))
           
           //tableColumns.project.value=["0"]
-          tableColumns.description.data=tags?.map((data) => ({
+          tableColumns.description.data=tags?.filter((data)=>Number(data.isDisabled)===0).map((data) => ({
             label: data.name,
             value: data.id.toString()
           }))
