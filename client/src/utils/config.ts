@@ -2,7 +2,7 @@ import { Iobject } from "../components/MTable/MTable"
 
 const local ="192.168.10.122"
 const glory ="192.168.10.213"
-export const serverIp=glory
+export const serverIp=local
 export const serverPort="4555"
 
 export interface ColumnData {

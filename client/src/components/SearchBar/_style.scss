@@ -39,3 +39,14 @@
     text-align: left;
 
 }
+.search-tag-body-tags{
+    display:inline-flex;
+}
+.search-tag-body-tag{
+    display: inline-block;
+    border-radius: 3px;
+    padding:2px;
+    background-color: $gray-600;
+    color:white;
+    margin-right: 2px;
+}
