@@ -17,6 +17,7 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
     const { result,setSearch,tags,setTags,projects,locations,categories } = useDBload();
     const [_tags,_setTags] = useState<OptionType[]>([]);
     const [selected,setSelected] = useState<SingleValue<OptionType> | MultiValue<OptionType>>([]);
+    
     const [selectedProj,setSelectedProj] = useState<SingleValue<OptionType> | MultiValue<OptionType>>([]);
     const [selectedCate,setSelectedCate] = useState<SingleValue<OptionType> | MultiValue<OptionType>>([]);
     const [selectedLoca,setSelectedLoca] = useState<SingleValue<OptionType> | MultiValue<OptionType>>([]);
@@ -95,6 +96,9 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
         setSearch(searchResult?searchResult:[])
         return;
       }
+      if(searchResult==undefined || searchResult?.length===0){
+        searchResult=result
+      }
       if(Array.isArray(selected)){
         _selected = selected.map(opt=>opt.label.toLowerCase())
         //const searchStr = element.value.toLowerCase(); // Convert search string to lowercase for case-insensitive search
@@ -108,16 +112,19 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
         var allTags:string[]=[]
         Object.keys(res).forEach(key => {
           if(tableColumns[key] && tableColumns[key].isFilterable){
+            //console.log(key,res[key])
             if(key==="description"){
-              console.log(res[key])
+              
               allTags = [...allTags,...(res[key].split(",").map((tag:string)=>tag.trim().toLowerCase()))]
+            }if(key==="docId"){
+              allTags = [...allTags,res[key].toString()]
             }else
               allTags = [...allTags,res[key]]
           }
           
         })
-        console.log(_selected,allTags)
-        return _selected.every(selectedItem => allTags.find(tag=>tag!==null &&tag.length>0 && tag.includes(selectedItem)) !== undefined);
+        //console.log(_selected,allTags)
+        return _selected.every(selectedItem => allTags.find(tag=>tag!==null &&tag.length>0 && tag.toString().includes(selectedItem)) !== undefined);
         // return Object.keys(res).some((key) => {
         //   const value = res[key];
         //   console.log("filteredResult",key,value)
@@ -131,6 +138,7 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
         //   return false;
         // });
       });
+      //console.log(_selected,searchResult,filteredResult)
       if (filteredResult === undefined) {
         setSearch([]);
       } else {
@@ -139,7 +147,7 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
     }
     
     useEffect(() => {
-      console.log("tags1",tags)
+      //console.log("tags1",tags)
       _setTags(tags?tags.map((data) => ({
         label: data.name,
         value: data.id.toString()

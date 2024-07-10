@@ -22,6 +22,8 @@ import Input from './components/Input/input';
 import { isObject } from 'util';
 import { Tooltip } from 'react-tooltip';
 import MessageBox from './components/MessageBox/MessageBox';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import SearchPage from './components/SearchBar/SearchPage';
 
 library.add(fas)
 
@@ -46,6 +48,7 @@ function App() {
   const showMessage = (mesg:string | null) => {
     setMessage(mesg);
   };
+  
   const MenuItemClicked = (e:React.MouseEvent<HTMLAnchorElement>,data:DBLoaderContextType)=>{
     e.preventDefault(); 
     //setShowHeaderMenu(false)
@@ -342,6 +345,12 @@ function App() {
     <div className="App">
       <div style={{ paddingTop: '50px' }}>
         <DBLoaderProvider >
+        
+            <DBLoader databaseType={'mssql'} />
+            
+      <Router>
+      <Routes>
+      <Route path="/" element={<>
             <Header title="档案归档" isMenuOpen={showHeaderMenu}>
               <HeaderMenuItem items={[
                 {icon:"user-plus",label:"注册账户",color:"#1362B7",id:"register",onClicked:MenuItemClicked},
@@ -351,9 +360,15 @@ function App() {
               ]}></HeaderMenuItem>
               
             </Header>
-            <DBLoader databaseType={'mssql'} />
             <SearchBar onSizeChanged={setTableMarginTop}/>
             <MTable style={{marginTop:tableMarginTop}}/>
+          </>} />
+        <Route path="/search" element={<><SearchPage /></>} />
+        
+            
+      </Routes>
+    </Router>
+            
         </DBLoaderProvider>
       </div>
       {showPopup && 
