@@ -72,17 +72,7 @@ const MTable: FC<ImTableProps> = (props) => {
     setCurrentPage((prevPage) => Math.max(prevPage - 1, 1));
     setGoToPage((prevPage) => Math.max(prevPage - 1, 1));
   };
-  const handleFristPage = () => {
-    setCurrentPage(1);
-    setGoToPage(1);
-  };
-  const handleLastPage= () => {
-    if(search!==undefined){
-        setCurrentPage(Math.ceil(search.length / itemsPerPage));
-        
-        setGoToPage(Math.ceil(search.length / itemsPerPage));
-    }
-  };
+
   const handleNextPage = () => {
     if(search!==undefined){
         setCurrentPage((prevPage) => Math.min(prevPage + 1, Math.ceil(search.length / itemsPerPage)));
@@ -180,42 +170,6 @@ const MTable: FC<ImTableProps> = (props) => {
             value: data.id.toString()
           }))
       },[categories,projects,locations,tags]);
-    //   useEffect(() => {
-
-    
-    //     const handleMouseOver = (event: MouseEvent) => {
-    //         if(event.target instanceof  HTMLTableCellElement){
-    //             const td=event.target as HTMLTableCellElement
-    //             const isOverflowing = td.scrollWidth > td.clientWidth ;
-    //             if(isOverflowing) td.classList.add('tool-tip')
-    //             else td.classList.remove('tool-tip')
-    //             console.log(td.textContent,isOverflowing)
-    //             //setTooltipVisible(isOverflowing);
-    //             //ReactTooltip.Tooltip();
-                
-    //         }
-    //     };
-    //     //window.addEventListener('resize', checkOverflow);
-    //     document.addEventListener('mouseover', handleMouseOver);
-    //     return () => {
-    //       //window.removeEventListener('resize', checkOverflow);
-    //       document.removeEventListener('mouseover', handleMouseOver);
-    //     };
-    //   },[]);
-    useEffect(() => {
-        // socket.on('serverMessage', (message) => {
-        //     console.log("message",message)
-        // });
-        // socket.on('connect', () => {
-        //     console.log('Connected to socket server');
-        //   });
-        // socket.on('connect_error', (error) => {
-        //     //console.error('Connection error:', error);
-        //   });
-        // return () => {
-        //     socket.off('message');
-        // };
-    }, []);
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
@@ -276,25 +230,6 @@ const MTable: FC<ImTableProps> = (props) => {
                 (imageURLs_thumb[item["docId"]]?'Loading...':'');
             }else if (type === "date") {
                 td_item = formatDateTime(item[key],tableColumns[key].format);
-            }else if (type === "combobox" || type === "multiCombobox") {
-                if(tableColumns[key].data!==undefined && tableColumns[key].data.length>0){
-                    //console.log(tableColumns[key].data)
-                    if((tableColumns[key].data as Iobject[]).find((d)=>{return d.label===item[key]})!==undefined){
-
-                    }else{
-                        
-                        if(tableColumns[key].backupKey!==undefined){
-
-                            const match=(tableColumns[key].data as Array<OptionType>).find((d)=>{return d.value.toString()===item[tableColumns[key].backupKey].toString()})
-                            //console.log("value is not match",tableColumns[key].data,item[tableColumns[key].backupKey])
-                            if(match!==undefined){
-                                td_item=match.label
-                            }
-                            
-                        }
-                    }
-                }
-                //td_item = tableColumns[key].data?tableColumns[key].data.find(()=>{})item[key];
             }
             
             return <td key={index} 
@@ -419,8 +354,11 @@ const MTable: FC<ImTableProps> = (props) => {
                       .then(response => response.json())
                       .then(data => {
                           console.log("saveData",data)
+                          
+                          setCurrentItem(undefined)
                           setReload?.(new Date().getTime()/1000)
                           showMessage(data.data.rowsAffected.length>0?"删除完成":"删除失败")
+
                       })
                 }
             } else {
@@ -429,7 +367,7 @@ const MTable: FC<ImTableProps> = (props) => {
         } catch (error) {
             console.error('Dialog was dismissed', error);
         }
-        setCurrentItem(undefined)
+        
         
     }
     const onSubmited = () => {
@@ -531,28 +469,14 @@ const MTable: FC<ImTableProps> = (props) => {
 
         console.log(currentItem,updatedItem)
     }
-    const getValuesFromLabels = (item:Iobject,key:string,columnData:ColumnData)=>{
-        const labels=item[key]
-        var result=labels.split(",").map((ik:String)=>{
+    const getValuesFromLabels = (labels:string,columnData:ColumnData)=>{
+        return labels.split(",").map((ik:String)=>{
             const matched = columnData.data.find(d=>d.label===ik.trim());
             if(matched!==undefined) return matched.value
         }).filter((itm:String) => itm !== undefined)
-        if(result.length===0){
-            if(tableColumns[key].backupKey!==undefined){
-                const backupKey=tableColumns[key].backupKey
-                
-                result = item[backupKey].toString().split(",").map((ik:String)=>{
-                    const matched = columnData.data.find(d=>d.value.toString()===ik.trim().toString());
-                    console.log("getValuesFromLabels",matched)
-                    if(matched!==undefined) return matched.value
-                }).filter((itm:String) => itm !== undefined)
-            }
-        }
-        return result
     }
-    const getValues = (item:Iobject,key:string,columnData:ColumnData) => {
-        const values=item[key]
-        return values?(values.constructor===String?getValuesFromLabels(item,key,columnData):[values]):(columnData.value?columnData.value:[])
+    const getValues = (values:string,columnData:ColumnData) => {
+        return values?(values.constructor===String?getValuesFromLabels(values,columnData):[values]):(columnData.value?columnData.value:[])
     }
     const getItem = (columnData:ColumnData,key:string,item:Iobject) => {
         const width=300
@@ -561,9 +485,9 @@ const MTable: FC<ImTableProps> = (props) => {
         }else if(columnData.type==="textarea"){
             return <textarea className="gr-textarea"  style={{width:width,margin:"5px 0px 5px 10px"}} name={key} value={item[key]} onChange={(e:React.ChangeEvent<HTMLTextAreaElement>)=>{onTextChanged(e,key,item)}}/>
         }else if (columnData.type==="combobox" || columnData.type==='multiCombobox'){
-            console.log(item[key],item[key].constructor,item[key].constructor===String?getValuesFromLabels(item,key,columnData):item[key])
+            console.log(item[key],item[key].constructor,item[key].constructor===String?getValuesFromLabels(item[key].toString(),columnData):item[key])
             return <Dropdown 
-            defaultValues={getValues(item,key,columnData)}
+            defaultValues={getValues(item[key],columnData)}
             style={{width:width,display:"inline-block",margin:"5px 0px 5px 10px",textAlign:'left'}}
             options={columnData.data?columnData.data:[]}
             isMulti={columnData.type==='multiCombobox'}
@@ -577,12 +501,8 @@ const MTable: FC<ImTableProps> = (props) => {
     }
     const onSelectValueChanged=(selectedOptions: SingleValue<OptionType> | MultiValue<OptionType>,key:string,item:Iobject) => {
         console.log(selectedOptions)
-        var updatedItem = { ...item, [key]: Array.isArray(selectedOptions)?selectedOptions.map(option => option.label).join(', '):
+        const updatedItem = { ...item, [key]: Array.isArray(selectedOptions)?selectedOptions.map(option => option.label).join(', '):
             (selectedOptions?(selectedOptions as OptionType).label:"" )};
-        if(tableColumns[key].backupKey!==undefined){
-            updatedItem = { ...updatedItem, [tableColumns[key].backupKey]: Array.isArray(selectedOptions)?selectedOptions.map(option => option.value).join(', '):
-            (selectedOptions?(selectedOptions as OptionType).value:"" )};
-        }
         console.log(updatedItem);
         setCurrentItem(updatedItem);
     }
@@ -675,9 +595,6 @@ const MTable: FC<ImTableProps> = (props) => {
                 </div>
             )}
             <div className="pagination">
-                <Button onClick={handleFristPage} style={{width:30}} disabled={currentPage === 1}>
-                <Icon icon="angle-double-left"/>
-                </Button>
                 <Button onClick={handlePreviousPage} disabled={currentPage === 1}>
                 <Icon icon="angle-left"/>
                 </Button>
@@ -687,9 +604,6 @@ const MTable: FC<ImTableProps> = (props) => {
                 </span>
                 <Button onClick={handleNextPage} disabled={currentPage === Math.ceil(search?.length / itemsPerPage)}>
                 <Icon icon="angle-right"/>
-                </Button>
-                <Button onClick={handleLastPage} style={{width:30}} disabled={currentPage === Math.ceil(search?.length / itemsPerPage)}>
-                <Icon icon="angle-double-right"/>
                 </Button>
                 <div style={{display:"inline-block",marginLeft:"10px"}}>
                     <label>

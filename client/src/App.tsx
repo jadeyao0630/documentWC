@@ -21,6 +21,7 @@ import Button from './components/Button/button';
 import Input from './components/Input/input';
 import { isObject } from 'util';
 import { Tooltip } from 'react-tooltip';
+import MessageBox from './components/MessageBox/MessageBox';
 
 library.add(fas)
 
@@ -39,9 +40,12 @@ function App() {
   const [showHeaderMenu, setShowHeaderMenu] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [tableMarginTop, setTableMarginTop] = useState(48);
+  const [message, setMessage] = useState<string | null>(null);
   
   const scrollableContainerRef = useRef<HTMLUListElement>(null);
-  
+  const showMessage = (mesg:string | null) => {
+    setMessage(mesg);
+  };
   const MenuItemClicked = (e:React.MouseEvent<HTMLAnchorElement>,data:DBLoaderContextType)=>{
     e.preventDefault(); 
     //setShowHeaderMenu(false)
@@ -173,84 +177,158 @@ function App() {
     console.log("newOptionData",newOptionData)
     setOptionData((opt)=>({...opt,[key]:newOptionData}));
   };
+  const processSubmitSave = (key:string,index:number,data:DBLoaderContextType) =>{
+    const {projects,categories,locations,setReload} =data
+    var sourceData:Iobject[]|undefined=[]
+    if(key==="categories"){
+      sourceData = categories
+    }
+    else if(key==="locations"){
+      sourceData = locations
+    }
+    else if(key==="projects"){
+      sourceData = projects
+    }
+    if(sourceData!==undefined){
+      const editItem=optionData[key][index]
+      console.log("saveChanges",editItem,(index>sourceData.length-1),optionData[key],sourceData)
+      const matched = sourceData.find(d=>{
+        return d.id===editItem.id
+      })
+      var keys:string[]=[]
+      var values:string[]=[]
+      var keys_values:string[]=[]
+      Object.keys(editItem).forEach(key=>{
+        if(key!=="id" && key!=="isNew"){
+
+          keys.push(key)
+          const val=key==="isDisabled"?editItem[key]?"1":"0":`N'${editItem[key]}'`;
+          values.push(val)
+          keys_values.push(`${key}=${val}`)
+        }
+      })
+      var query=""
+      if(editItem.isNew){
+        query=`INSERT INTO ${key} (${keys.join(", ")}) VALUES (${values.join(",")});`
+      }else{
+        if(matched!==undefined){
+          query=`UPDATE ${key} SET ${keys_values.join(",")} WHERE id=${matched.id};
+                UPDATE documents_list SET category = N'${editItem.name}' WHERE category=N'${matched.name}';`
+        }else{
+          query=`INSERT INTO ${key} (${keys.join(", ")}) VALUES (${values.join(",")});`
+        }
+        
+        
+      }
+      fetch("http://"+serverIp+":"+serverPort+"/saveData",{
+        headers:{
+          'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify({ type: 'mssql',query:query})
+      })
+      .then(response => response.json())
+      .then(data => {
+          console.log("saveData",data,query)
+          setReload?.(new Date().getTime()/1000)
+          showMessage(data.data.rowsAffected.length>0?"执行完成":"执行失败")
+
+      })
+    }
+    
+  }
   const saveChanges = (key:string,index: number) => {
     if(_data!==undefined && optionData!==undefined){
-      if(key==="projects"){
-        const {projects,setProjects} =_data
-        if(projects!==undefined){
-          if(index>projects.length-1){
-            projects?.push(optionData[key][index])
-            setProjects(projects)
-          }else{
+      // if(key==="projects"){
+      //   const {projects,setProjects} =_data
+      //   if(projects!==undefined){
+      //     if(index>projects.length-1){
+      //       projects?.push(optionData[key][index])
+      //       setProjects(projects)
+      //     }else{
 
-            setProjects(projects?.map((p:Iobject,idx:number)=>
-              {return idx === index? optionData[key][index]:p}
-            ))
-          }
+      //       setProjects(projects?.map((p:Iobject,idx:number)=>
+      //         {return idx === index? optionData[key][index]:p}
+      //       ))
+      //     }
 
-        }
-      }else if(key==="categories"){
-        const {categories,setCategories} =_data
-        if(categories!==undefined){
-          const editItem=optionData[key][index]
-          console.log("saveChanges",editItem,(index>categories.length-1),optionData[key],categories)
-          const matched = categories.find(d=>{
-            return d.id===editItem.id
-          })
-          var keys:string[]=[]
-          var values:string[]=[]
-          var keys_values:string[]=[]
-          Object.keys(editItem).forEach(key=>{
-            if(key!=="id" && key!=="isNew"){
+      //   }
+      // }else if(key==="categories"){
+      //   const {categories,setCategories,setReload} =_data
+      //   if(categories!==undefined){
+      //     const editItem=optionData[key][index]
+      //     console.log("saveChanges",editItem,(index>categories.length-1),optionData[key],categories)
+      //     const matched = categories.find(d=>{
+      //       return d.id===editItem.id
+      //     })
+      //     var keys:string[]=[]
+      //     var values:string[]=[]
+      //     var keys_values:string[]=[]
+      //     Object.keys(editItem).forEach(key=>{
+      //       if(key!=="id" && key!=="isNew"){
 
-              keys.push(key)
-              const val=key==="id" || key==="isDisabled"?editItem[key]:`N'${editItem[key]}'`;
-              values.push(val)
-              keys_values.push(`${key}=${val}`)
-            }
-          })
-          var query=""
-          if(editItem.isNew){
-            query=`INSERT INTO categories (${keys.join(", ")}) VALUES (${values.join(",")});`
-          }else{
-            if(matched!==undefined){
-              query=`UPDATE categories SET ${keys_values.join(",")} WHERE id=${matched.id};
-                    UPDATE documents_list SET category = N'${editItem.name}' WHERE category=N'${matched.name}';`
-            }else{
-              query=`INSERT INTO categories (${keys.join(", ")}) VALUES (${values.join(",")});`
-            }
+      //         keys.push(key)
+      //         const val=key==="isDisabled"?editItem[key]?"1":"0":`N'${editItem[key]}'`;
+      //         values.push(val)
+      //         keys_values.push(`${key}=${val}`)
+      //       }
+      //     })
+      //     var query=""
+      //     if(editItem.isNew){
+      //       query=`INSERT INTO categories (${keys.join(", ")}) VALUES (${values.join(",")});`
+      //     }else{
+      //       if(matched!==undefined){
+      //         query=`UPDATE categories SET ${keys_values.join(",")} WHERE id=${matched.id};
+      //               UPDATE documents_list SET category = N'${editItem.name}' WHERE category=N'${matched.name}';`
+      //       }else{
+      //         query=`INSERT INTO categories (${keys.join(", ")}) VALUES (${values.join(",")});`
+      //       }
            
             
-          }
-          console.log(query)
-          if(index>categories.length-1){
-            categories?.push(editItem)
-            setCategories(categories)
-          }else{
-            setCategories(categories?.map((p:Iobject,idx:number)=>
-              {
-                console.log(p,editItem)
-                return {...p,...editItem}
-              }
-          
-            ))
-          }
-        }
-      }else if(key==="locations"){
-        const {locations,setLocations} =_data
-        if(locations!==undefined){
-          if(index>locations.length-1){
-            locations?.push(optionData[key][index])
-            setLocations(locations)
-          }else{
+      //     }
+      //     fetch("http://"+serverIp+":"+serverPort+"/saveData",{
+      //       headers:{
+      //         'Content-Type': 'application/json'
+      //       },
+      //       method: 'POST',
+      //       body: JSON.stringify({ type: 'mssql',query:query})
+      //     })
+      //     .then(response => response.json())
+      //     .then(data => {
+      //         console.log("saveData",data,query)
+      //         setReload?.(new Date().getTime()/1000)
+      //         showMessage(data.data.rowsAffected.length>0?"执行完成":"执行失败")
 
-            setLocations(locations?.map((p:Iobject,idx:number)=>
-              {return idx === index? optionData[key][index]:p}
+      //     })
+      //     // if(index>categories.length-1){
+      //     //   categories?.push(editItem)
+      //     //   setCategories(categories)
+      //     // }else{
+      //     //   setCategories(categories?.map((p:Iobject,idx:number)=>
+      //     //     {
+      //     //       console.log(p,editItem)
+      //     //       return {...p,...editItem}
+      //     //     }
           
-            ))
-          }
-        }
-      }
+      //     //   ))
+      //     // }
+      //   }
+      // }else if(key==="locations"){
+      //   const {locations,setLocations} =_data
+      //   if(locations!==undefined){
+      //     if(index>locations.length-1){
+      //       locations?.push(optionData[key][index])
+      //       setLocations(locations)
+      //     }else{
+
+      //       setLocations(locations?.map((p:Iobject,idx:number)=>
+      //         {return idx === index? optionData[key][index]:p}
+          
+      //       ))
+      //     }
+      //   }
+      // }
+      processSubmitSave(key,index,_data)
       setOptionOriginalData((opt)=>({...opt,[key]:opt[key].map((op:Iobject,id:number)=>(
         id === index 
           ? optionData[key][index]
@@ -263,7 +341,7 @@ function App() {
   return (
     <div className="App">
       <div style={{ paddingTop: '50px' }}>
-        <DBLoaderProvider>
+        <DBLoaderProvider >
             <Header title="档案归档" isMenuOpen={showHeaderMenu}>
               <HeaderMenuItem items={[
                 {icon:"user-plus",label:"注册账户",color:"#1362B7",id:"register",onClicked:MenuItemClicked},
@@ -284,6 +362,14 @@ function App() {
           {PopupContent}
         </div>
       </div>}
+      {message && (
+                <MessageBox
+                message={message}
+                type="success"
+                duration={3000}
+                onClose={() => setMessage(null)}
+                />
+            )}
     </div>
   );
 }

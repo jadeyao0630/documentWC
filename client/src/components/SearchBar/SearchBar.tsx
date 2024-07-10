@@ -155,7 +155,7 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
                   })):[]}
                   isMulti={true}
                   showDropIndicator={true}
-                  showInput={false}
+                  showInput={true}
                   onChange={_projChange}
                   placeholder="请选择项目"
                 ></Dropdown>
@@ -167,7 +167,7 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
                   })):[]}
                   isMulti={true}
                   showDropIndicator={true}
-                  showInput={false}
+                  showInput={true}
                   onChange={_cateChange}
                   placeholder="请选择分类"
                 ></Dropdown>
@@ -179,7 +179,7 @@ const SearchBar: FC<ISearchBarProps> = (props) => {
                   })):[]}
                   isMulti={true}
                   showDropIndicator={true}
-                  showInput={false}
+                  showInput={true}
                   onChange={_locaChange}
                   placeholder="请选择位置"
                 ></Dropdown>

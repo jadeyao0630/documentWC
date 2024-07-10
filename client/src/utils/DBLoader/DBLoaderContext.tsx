@@ -23,7 +23,7 @@ export interface DBLoaderContextType {
   tagsToAdd?:Array<Iobject>;
   setTagsToAdd:(tagsToAdd:Array<Iobject>)=>void;
   reload?:Number;
-  setReload?:(reload:Number)=>void
+  setReload?:(reload:Number)=>void;
 }
 
 // 创建上下文
