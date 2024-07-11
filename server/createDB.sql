@@ -70,6 +70,8 @@ BEGIN
         name NVARCHAR(1000),
         userName NVARCHAR(255),
         pass NVARCHAR(1000),
+        auth NVARCHAR(1000),
+        userData NVARCHAR(1000),
         isDisabled BIT default 0,
         PRIMARY KEY (id, userName)
     )

@@ -87,7 +87,11 @@ function App() {
         <span className="close-button" onClick={()=>{setShowPopup(undefined)}}>&times;</span>
         <div style={{margin:"40px 0px"}}>
           <FileUpload onCompleted={(isCompleted)=>{
-
+              console.log("isCompleted",isCompleted)
+              if(_data!==undefined){
+                const {setReload} = _data
+                setReload?.(new Date().getTime()/1000)
+              }
               setIsProcessing(!isCompleted)
             
           }}/>

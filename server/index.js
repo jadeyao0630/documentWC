@@ -358,11 +358,105 @@ app.post('/uploadImage', async (req, res) => {
         const timespanRecords=[]
         var lastDate=undefined
         // 遍历每个sheet
+        const tableQuery = `
+            IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='documents_list' AND xtype='U')
+            BEGIN
+                CREATE TABLE documents_list (
+                    id INT IDENTITY(1,1),
+                    docId INT,
+                    title NVARCHAR(1000) default '',
+                    category NVARCHAR(255) default '',
+                    categoryId INT default -1,
+                    project NVARCHAR(255) default '',
+                    projectId INT default -1,
+                    agent NVARCHAR(1000) default '',
+                    person NVARCHAR(1000) default '',
+                    location NVARCHAR(255) default '',
+                    locationId INT default -1,
+                    createTime DATETIME,
+                    modifiedTime DATETIME,
+                    description NVARCHAR(1000) default '',
+                    remark NVARCHAR(1000) default '',
+                    coverPage NVARCHAR(1000) default '',
+                    attachement NVARCHAR(1000) default '',
+                    isDisabled BIT default 0,
+                    PRIMARY KEY (id, docId)
+                )
+            END;
+
+            IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='tags' AND xtype='U')
+            BEGIN
+                CREATE TABLE tags (
+                    id INT PRIMARY KEY,
+                    name NVARCHAR(1000),
+                    freq INT DEFAULT 1,
+                    isDisabled BIT default 0,
+                )
+            END;
+
+            IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='projects' AND xtype='U')
+            BEGIN
+                CREATE TABLE projects (
+                    id INT IDENTITY(1,1) PRIMARY KEY,
+                    name NVARCHAR(1000),
+                    isDisabled BIT default 0,
+                )
+            END;
+            IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='categories' AND xtype='U')
+            BEGIN
+                CREATE TABLE categories (
+                    id INT IDENTITY(1,1) PRIMARY KEY,
+                    name NVARCHAR(1000),
+                    isDisabled BIT default 0,
+                )
+            END;
+            IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='locations' AND xtype='U')
+            BEGIN
+                CREATE TABLE locations (
+                    id INT IDENTITY(1,1) PRIMARY KEY,
+                    name NVARCHAR(1000),
+                    isDisabled BIT default 0,
+                )
+            END;
+
+            IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='user_list' AND xtype='U')
+            BEGIN
+                CREATE TABLE user_list (
+                    id INT IDENTITY(1,1),
+                    name NVARCHAR(1000),
+                    userName NVARCHAR(255),
+                    pass NVARCHAR(1000),
+                    auth NVARCHAR(1000),
+                    userData NVARCHAR(1000),
+                    isDisabled BIT default 0,
+                    PRIMARY KEY (id, userName)
+                )
+            END;
+            `
+        try {
+          const result = await db.mssqlExcute(tableQuery)
+        }catch(err) {
+          console.error('SQL Error: ', err,tableQuery);
+        }
+        const categories = []
+        const projects = []
+        const locations = []
+        const itemsQueries = []
         for (const sheetName of sheetNames) {
             const worksheet = workbook.Sheets[sheetName];
+            const sName=sheetName==="Sheet1"?"其它":sheetName
             //const mergeValueMap = handleMergedCells(worksheet);
             const data = xlsx.utils.sheet_to_json(worksheet);
-
+            categories.push(sName)
+            const cateQuery = `IF NOT EXISTS (SELECT 1 FROM categories WHERE name = N'${sName}')
+                INSERT INTO categories (name) VALUES (N'${sName}')
+                ELSE
+                UPDATE categories SET name = N'${sName}' WHERE name = N'${sName}'`
+            try {
+              const result = await db.mssqlExcute(cateQuery)
+            }catch(err) {
+              console.error('SQL Error: ', err,cateQuery);
+            }
             // 遍历每行数据
             for (const [rowIndex, row] of data.entries()) {
                 if(row['日期']===undefined) row['日期']=lastDate?lastDate:moment().format('YYYY-MM-DD');
@@ -374,7 +468,45 @@ app.post('/uploadImage', async (req, res) => {
                   timespan++;
                 }
                 timespanRecords.push(timespan)
-
+                if (row['所属项目']!==undefined && !projects.includes(row['所属项目'])) {
+                  projects.push(row['所属项目'])
+                  const projQuery = `IF NOT EXISTS (SELECT 1 FROM projects WHERE name = N'${row['所属项目']}')
+                  INSERT INTO projects (name) VALUES (N'${row['所属项目']}')
+                  ELSE
+                  UPDATE projects SET name = N'${row['所属项目']}' WHERE name = N'${row['所属项目']}'`
+                  try {
+                    
+                    const result = await db.mssqlExcute(projQuery)
+                  }catch(err) {
+                    console.error('SQL Error: ', err,projQuery);
+                  }
+                }
+                if (row['存放位置']!==undefined && row['存放位置'] && !locations.includes(row['存放位置'])) {
+                  locations.push(row['存放位置'])
+                  const locaQuery = `IF NOT EXISTS (SELECT 1 FROM locations WHERE name = N'${row['存放位置']}')
+                  INSERT INTO locations (name) VALUES (N'${row['存放位置']}')
+                  ELSE
+                  UPDATE locations SET name = N'${row['存放位置']}' WHERE name = N'${row['存放位置']}'`
+                  try {
+                    
+                    const result = await db.mssqlExcute(locaQuery)
+                  }catch(err) {
+                    console.error('SQL Error: ', err,locaQuery);
+                  }
+                }
+                if (row['盒号']!==undefined && row['盒号'] && !locations.includes(row['盒号'])) {
+                  locations.push(row['盒号'])
+                  const locaQuery = `IF NOT EXISTS (SELECT 1 FROM locations WHERE name = N'${row['盒号']}')
+                  INSERT INTO locations (name) VALUES (N'${row['盒号']}')
+                  ELSE
+                  UPDATE locations SET name = N'${row['盒号']}' WHERE name = N'${row['盒号']}'`
+                  try {
+                    
+                    const result = await db.mssqlExcute(locaQuery)
+                  }catch(err) {
+                    console.error('SQL Error: ', err,locaQuery);
+                  }
+                }
                 //console.log(row['日期'],`${moment(converted).format('YYYY-MM-DD')} ${currentTime}`,sheetName,converted)
                 const dateStr=converted.toISOString().slice(0, 19).replace('T', ' ')
                 // const docId = timespan; // 用日期转化成timestamp
@@ -389,13 +521,17 @@ app.post('/uploadImage', async (req, res) => {
                 const values = {
                   docId:timespan,
                   createTime : dateStr,
-                  title : row['文件名称'] || row['请示名称'] || row['工程名称'] || row['图纸名称'] || row['合同名称'],
-                  category : sheetName,
-                  project : row['所属项目'],
-                  agent : row['出图单位'] || row['发文单位'] || row['责任人'] || row['签发单位'],
-                  person : row['经办人'] || row['存档人'] || row['规划院移交人'],
-                  location : row['存放位置'] || row['盒号'],
-                  remark : row['中标金额'] || row['抵扣工程合同清单'] || row['版本号'] || row['抵押物'] || row['原件或复印件']
+                  title : row['文件名称'] || 
+                  row['请示名称'] || 
+                  row['工程名称'] || 
+                  ((row['图纸名称'] || "")+"-" +(row['版本号']||"")) || 
+                  (row['合同名称']|| "")+"-"+ (row['合同编号']|| "")+"-"+ (row['签订日期']|| "") || '',
+                  category : sheetName==="Sheet1"?"其它":sheetName,
+                  project : row['所属项目']||'',
+                  agent : row['出图单位'] || row['发文单位'] || row['责任人'] || row['签发单位'] || row['中标单位'] || row['签订单位'] || '',
+                  person : row['经办人'] || row['存档人'] || row['规划院移交人'] || '',
+                  location : row['存放位置'] || row['盒号'] || '',
+                  remark : row['中标金额'] || row['抵扣工程合同清单'] || row['移交日期'] || row['抵押物'] || row['原件或复印件'] || row['省份'] || row['中标金额'] || ''
                 }
                 const keys=[]
                 const sourceKeys=[]
@@ -426,13 +562,14 @@ app.post('/uploadImage', async (req, res) => {
                 WHEN NOT MATCHED THEN
                     INSERT (${keys.join(", ")})
                     VALUES (${sourceKeys.join(", ")});`
+                itemsQueries.push(query)
                 // 执行SQL插入
                 currentSheet=sheetName
                 currentRow=rowIndex + 1
                 currentValues=values
                 try {
                   //console.log(query)
-                    const result = await db.mssqlExcute(query)
+                    //const result = await db.mssqlExcute(query)
                     results.push(values)
                     wss.clients.forEach(client => {
                       if (client.readyState === WebSocket.OPEN) {
@@ -452,8 +589,15 @@ app.post('/uploadImage', async (req, res) => {
             }
             
         }
-
-        res.json({data:results,success:true})
+        try {
+          //console.log(query)
+            await executeBatchQueries(itemsQueries,500)
+            
+            res.json({data:results,success:true})
+        } catch (err) {
+          console.error('SQL Error: ', err);
+          res.json({data:results,success:false})
+        }
         //res.send('File processed and data inserted into MSSQL');
     } catch (err) {
         console.error("error",err);
@@ -467,6 +611,14 @@ app.post('/uploadImage', async (req, res) => {
         //res.status(500).send('Error processing file');
     }
 });
+const executeBatchQueries = async (queries, batchSize) => {
+  for (let i = 0; i < queries.length; i += batchSize) {
+      const batch = queries.slice(i, i + batchSize);
+      const batchQuery = batch.join(' ');
+      //console.log(batchQuery)
+      await db.mssqlExcute(batchQuery)
+  }
+};
 const convertExcelDate = (excelDate) => {
   // Excel's date system starts on 1900-01-01, but it treats 1900 as a leap year, which it isn't
   const excelEpoch = new Date(1899, 11, 30); // 1899-12-30 is the correct epoch for Excel dates

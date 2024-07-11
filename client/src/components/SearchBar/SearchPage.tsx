@@ -41,9 +41,9 @@ const SearchPage: React.FC = () => {
                 <p>经办人：</p><p>{doc.person}</p>
                 <p>责任人：</p><p>{doc.agent}</p>
                 <p>备注：</p><p>{doc.remark}</p>
-                <p>标签：</p><p className='search-tag-body-tags'>{doc.description.split(",").map((tag:string,index:Number)=>(
+                <p>标签：</p>{doc.description.length>0?<p className='search-tag-body-tags'>{doc.description.split(",").map((tag:string,index:Number)=>(
                   <div className='search-tag-body-tag'>{tag.trim()}</div>
-                ))}</p>
+                ))}</p>:<p></p>}
                 <p>位置：</p><p>{doc.location}</p>
             </div>
         </div>

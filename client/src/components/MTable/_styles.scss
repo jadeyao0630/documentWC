@@ -9,7 +9,7 @@ table{
         //position: relative;
         //pointer-events: none;
         td,th{
-            border-bottom: 1px solid #ddd;
+            //border-bottom: 1px solid #ddd;
             
             padding:1rem .5rem;
             white-space: nowrap;
@@ -24,7 +24,7 @@ table{
             background-color: white;
         }
         th:not(last-child){
-            border-right: 2px solid #ddd;
+            border-right: 1px solid #ddd;
             padding:.5rem .5rem;
         }
         td>div{
@@ -35,18 +35,25 @@ table{
             cursor: pointer; /* 添加鼠标指针样式，表示可点击 */
         }
         td:hover {
-            background-color: #f1f1f1; /* 添加悬停效果，增强用户体验 */
+            background-color: #e5f5ff; /* 添加悬停效果，增强用户体验 */
           }
         // &:last-child{
         //     td{
         //         border-bottom:none;
         //     }
         // }
+        &:nth-child(even) {
+          background-color: #f2f2f2;
+          td.fixed-pos{
+            background-color: #f2f2f2;
+          }
+        }
     }
     thead{
         position:sticky;
         top:97px;
         z-index: 99;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 }
 .fixed-pos{
@@ -55,8 +62,17 @@ table{
   z-index: 98;
   border-right: 1px solid #ddd;
 }
+.fixed-1st-th{
+  z-index: 100;
+  left:0;
+  
+}
 .fixed-1st{
   left:0;
+}
+.fixed-2nd{
+  left: 50px;
+  z-index: 97;
 }
 .fixed-last{
   right:0;
@@ -64,7 +80,7 @@ table{
   border-right: none;
 }
 .popupImg {
-    position: absolute;
+    position: fixed;
     left:0;
     top:0;
     background: rgba(0, 0, 0, 0.8);
@@ -109,7 +125,7 @@ table{
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 999;
+    z-index: 1200;
   }
   
   /* Modal content */

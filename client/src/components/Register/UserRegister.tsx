@@ -66,7 +66,7 @@ const UserRegister: React.FC = () => {
     } else {
       setErrors({});
       setSubmitted(true);
-      const query=`INSERT INTO user_list (name,userName,pass,isDisabled) VALUES (N'${form.username}',N'${form.userFullname}',N'${encrypt(form.password)}',0);`
+      const query=`INSERT INTO user_list (name,userName,pass,auth,userData,isDisabled) VALUES (N'${form.userFullname}',N'${form.username}',N'${encrypt(form.password)}',N'',N'',0);`
       fetch("http://"+serverIp+":"+serverPort+"/saveData",{
         headers:{
           'Content-Type': 'application/json'

@@ -234,7 +234,7 @@ const MTable: FC<ImTableProps> = (props) => {
             
             return <td key={index} 
                         data-index={index} 
-                        className={tableColumns[key].isFixed?"fixed-pos fixed-1st":""}
+                        className={tableColumns[key].isFixed?"fixed-pos fixed-2nd":""}
                         //data-tooltip-id={"table-tooltips"} 
                         //data-tooltip-content={td_item} 
                         style={style} 
@@ -280,7 +280,7 @@ const MTable: FC<ImTableProps> = (props) => {
             if(columnData.style) style={...style, ...columnData.style }
             var th_item=columnData.label;
 
-            return <th className={tableColumns[key].isFixed?"fixed-pos fixed-1st":""} key={index} data-index={index} style={style}>{th_item}</th>
+            return <th className={tableColumns[key].isFixed?"fixed-pos fixed-2nd":""} key={index} data-index={index} style={style}>{th_item}</th>
         }return null
     }
     const headers = Object.keys(tableColumns)
@@ -532,10 +532,15 @@ const MTable: FC<ImTableProps> = (props) => {
         setDialogMessage(null)
     };
     return (
-        <div style={style}>
+        <div style={{...style,...{}}}>
             <table>
                 <thead>
                     <tr key="header_tr">
+                    <th key={"header-index-0"} 
+                                className="fixed-pos fixed-1st-th"
+                                style={{padding:0,minWidth:50}}>
+                                    #
+                                </th>
                         {headers.map((item, index) => (
                             setTh(index,item)
                         ))}
@@ -545,16 +550,22 @@ const MTable: FC<ImTableProps> = (props) => {
                 <tbody>
                     {paginatedData?.map((item:Iobject, index) => (
                         <tr key={index}>
+                            <td key={"index-"+index} 
+                                data-index={"index-"+index} className="fixed-pos fixed-1st"
+                                style={{padding:0,width:50}}>
+                                    {item.id}
+                                </td>
                             {headers.map((key, subIndex) => (
                                 setTd(subIndex,key,item)
                             ))}
                             <td key={"action_btns_"+index } className="fixed-pos fixed-last"
                                 style={{padding:0}}>
                                 <Button 
-                                style={{margin:5}}
+                                style={{margin:5,border:"none",width:"35px"}}
+                                hasShadow
                                 data-tooltip-id={"table-tooltips"} 
                                 data-tooltip-content={'编辑档案'} 
-                                onClick={() => openModal(item["docId"])} >编辑</Button></td>
+                                onClick={() => openModal(item["docId"])} ><Icon style={{color:"#348a09"}} icon="edit"></Icon></Button></td>
                         </tr>
                     ))}
                 </tbody>
