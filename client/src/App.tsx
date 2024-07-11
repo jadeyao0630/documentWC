@@ -59,7 +59,7 @@ function App() {
     e.preventDefault(); 
     //setShowHeaderMenu(false)
     //console.log(e.currentTarget.dataset.name,projects)
-    if(e.currentTarget.dataset.name==="import" || e.currentTarget.dataset.name==="register" || e.currentTarget.dataset.name==="options")
+    if(e.currentTarget.dataset.name==="import" || e.currentTarget.dataset.name==="register" || e.currentTarget.dataset.name==="options"){
       setShowPopup(e.currentTarget.dataset.name)
       if(e.currentTarget.dataset.name==="options"){
         const optionList:Iobject={projects:[],tags:[],locations:[],categories:[]}
@@ -73,8 +73,11 @@ function App() {
         setOptionData(optionList)
         setOptionOriginalData(optionList)
       }
-    else{
+      else{
 
+      }
+    }else if(e.currentTarget.dataset.name==="export"){
+      
     }
   }
   var PopupContent = (
@@ -299,6 +302,7 @@ function App() {
             <Header title="档案归档" isMenuOpen={showHeaderMenu}>
               <HeaderMenuItem items={[
                 //{icon:"user-plus",label:"注册账户",color:"#1362B7",id:"register",onClicked:MenuItemClicked},
+                {icon:"file-export",label:"导出数据",color:"#1362B7",id:"export",onClicked:MenuItemClicked},
                 {icon:"upload",label:"导入数据",color:"#348a09",id:"import",onClicked:MenuItemClicked},
                 {icon:"list-alt",label:"编辑选项",color:"#d63384",id:"options",onClicked:MenuItemClicked},
                 //{icon:"sign-out",label:"退出",color:"red",id:"exit",onClicked:MenuItemClicked}
