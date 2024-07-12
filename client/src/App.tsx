@@ -24,6 +24,11 @@ import { Tooltip } from 'react-tooltip';
 import MessageBox from './components/MessageBox/MessageBox';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import SearchPage from './components/SearchBar/SearchPage';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import {tableColumns} from './utils/config'
+import { formatDate } from './utils/utils';
+import Dialog from './components/Dialog/Dialog';
 
 library.add(fas)
 
@@ -45,9 +50,34 @@ function App() {
   const [message, setMessage] = useState<string | null>(null);
   
   const scrollableContainerRef = useRef<HTMLUListElement>(null);
+  const [dialogMessage, setDialogMessage] = useState<string | null>(null);
+  const [dialogPromise, setDialogPromise] = useState<{ resolve: (value: boolean) => void, reject: () => void } | null>(null);
   const showMessage = (mesg:string | null) => {
     setMessage(mesg);
   };
+  
+  const handleConfirm = () => {
+    if (dialogPromise) {
+        dialogPromise.resolve(true);
+    }
+    //setDialogVisible(false);
+    setDialogMessage(null)
+};
+
+const handleCancel = () => {
+    if (dialogPromise) {
+        dialogPromise.resolve(false);
+    }
+    //setDialogVisible(false);
+    setDialogMessage(null)
+};
+  const showDialog = (mesg:string|null) => {
+    //setDialogVisible(true);
+    setDialogMessage(mesg)
+    return new Promise<boolean>((resolve, reject) => {
+    setDialogPromise({ resolve, reject });
+    });
+};
   const onFilterChanged = (e:React.ChangeEvent<HTMLInputElement>) =>{
     if(optionIndex) {
       //e.target.value.length>0
@@ -55,7 +85,7 @@ function App() {
       setOptionData({...optionData,[optionIndex]:optionData[optionIndex].map((d:Iobject)=>({...d,isHide:e.target.value.length>0 && !d.name.includes(e.target.value)}))})
     }
   }
-  const MenuItemClicked = (e:React.MouseEvent<HTMLAnchorElement>,data:DBLoaderContextType)=>{
+  const MenuItemClicked = async (e:React.MouseEvent<HTMLAnchorElement>,data:DBLoaderContextType)=>{
     e.preventDefault(); 
     //setShowHeaderMenu(false)
     //console.log(e.currentTarget.dataset.name,projects)
@@ -77,6 +107,43 @@ function App() {
 
       }
     }else if(e.currentTarget.dataset.name==="export"){
+      const userResponse = await showDialog("确认导出吗？")
+      if (userResponse) {
+        const {search} = data
+        const fileName="export_"+formatDate(new Date())
+        console.log("search",search)
+        if(search){
+            const formatSearch=search.map((item)=>{
+              const newItem:Iobject={}
+              Object.keys(item).forEach(key=>{
+                if (tableColumns.hasOwnProperty(key) && tableColumns[key].canBeExport){
+                  newItem[tableColumns[key].label]=tableColumns[key].type==="date"?new Date(item[key]):item[key]
+                }
+              })
+              return newItem;
+            })
+            const wscols = Object.keys(formatSearch[0]).map((key) => {
+              const maxLength = Math.max(
+                ...formatSearch.map((item) => item[key].toString().length),
+                key.length
+              );
+              return { wch: maxLength + 4 }; // Add extra space for padding
+            });
+            const worksheet = XLSX.utils.json_to_sheet(formatSearch);
+            worksheet['!cols'] = wscols;
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, '档案');
+        
+            //XLSX.writeFile(workbook, `${fileName}.xlsx`);
+            const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+
+            // Create a Blob from the buffer
+            const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+
+            // Use FileSaver to save the Blob as an Excel file
+            saveAs(blob, `${fileName}.xlsx`);
+          }
+        }
       
     }
   }
@@ -327,6 +394,10 @@ function App() {
           {PopupContent}
         </div>
       </div>}
+      
+      {dialogMessage && <Dialog title="消息" onConfirm={handleConfirm}
+                message={dialogMessage}
+                onCancel={handleCancel} />}
       {message && (
                 <MessageBox
                 message={message}

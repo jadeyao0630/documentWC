@@ -17,20 +17,23 @@ export interface ColumnData {
     isHide:boolean;
     style?:React.CSSProperties;
     backupKey?:string;
+    canBeExport?:boolean;
   }
-export const tableColumns:Iobject={
+  export const tableColumns:Iobject={
     docId:{
         label:'编号',
         width:80,
         type:'text',
         isFilterable:true,
-        isFixed:true
+        isFixed:true,
+        canBeExport:true
     },
     createTime:{
         label:'创建日期',
         width:100,
         type:'date',
-        format:'yyyy/mm/dd'
+        format:'yyyy/mm/dd',
+        canBeExport:true
     },
     project:{
         label:'所属项目',
@@ -41,7 +44,8 @@ export const tableColumns:Iobject={
         data:[],
         value:["0"],
         isFilterable:true,
-        backupKey:'projectId'
+        backupKey:'projectId',
+        canBeExport:true
     },
     category:{
         label:'分类',
@@ -52,7 +56,8 @@ export const tableColumns:Iobject={
         data:[],
         value:["0"],
         isFilterable:true,
-        backupKey:'categoryId'
+        backupKey:'categoryId',
+        canBeExport:true
     },
     title:{
         label:'名称',
@@ -60,14 +65,16 @@ export const tableColumns:Iobject={
         width:300,
         style:{minWidth:200},
         type:'textarea',
-        isFilterable:true
+        isFilterable:true,
+        canBeExport:true
     },
     agent:{
         label:'责任者',
         isEditble:true,
         width:"auto",
         type:'text',
-        isFilterable:true
+        isFilterable:true,
+        canBeExport:true
     },
     person:{
         label:'经办人',
@@ -75,7 +82,8 @@ export const tableColumns:Iobject={
         width:120,
         style:{maxWidth:120},
         type:'text',
-        isFilterable:true
+        isFilterable:true,
+        canBeExport:true
     },
     location:{
         label:'位置',
@@ -85,7 +93,8 @@ export const tableColumns:Iobject={
         data:[],
         value:["0"],
         isFilterable:true,
-        backupKey:'locationId'
+        backupKey:'locationId',
+        canBeExport:true
     },
     modifiedTime:{
         label:'更新日期',
@@ -98,7 +107,8 @@ export const tableColumns:Iobject={
         isEditble:true,
         width:"auto",
         type:'text',
-        isFilterable:true
+        isFilterable:true,
+        canBeExport:true
     },
     description:{
         label:'标签',
@@ -107,7 +117,8 @@ export const tableColumns:Iobject={
         type:'multiCombobox',
         data:[],
         value:[],
-        isFilterable:true
+        isFilterable:true,
+        canBeExport:true
     },
     coverPage:{
         label:'封面页',
@@ -118,6 +129,7 @@ export const tableColumns:Iobject={
         label:'附件',
         width:"auto",
         type:'file',
-        isHide:false
+        isHide:false,
+        isEditble:true,
     },
 }

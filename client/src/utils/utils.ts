@@ -18,8 +18,15 @@ import { Iobject } from "../components/MTable/MTable";
               .replace("mm",minutes.toString())
               .replace("ss",seconds.toString())//`${year}年${month}月${day}日 ${hours}:${minutes}`;
 }
+const formatDate = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  
+  return `${year}-${month}-${day}`;
+};
 const findColumnByLabel = (columns: Iobject, label: string) => {
     const key = Object.keys(columns).find(key => key === label && columns[key].isEditble);
     return key ? columns[key] : undefined;
   }
-export {formatDateTime,findColumnByLabel}
+export {formatDate,formatDateTime,findColumnByLabel}
